@@ -98,12 +98,16 @@ def get_md5_digest(path):
 def build_coffee(path):
 	debug('Compiling %s' % path)
 	command_args = ['coffee', '-b', '-c', path]
-	process = subprocess.Popen(command_args, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+	process = subprocess.Popen(command_args, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 	result = process.wait()
 	if result != 0:
 		msg = process.stderr.read()
 		if msg:
-			err("%s (%s)" % (msg, path))
+			if msg.find("\n"):
+				msg1 = msg[:msg.find("\n")]
+			else:
+				msg1 = msg
+			err("%s (%s)" % (msg1, path))
 		else:
 			err("CoffeeScript compiler call for %s failed but no error message was generated" % path)
 		return False
@@ -124,6 +128,9 @@ def build_all_coffee(path, file_hash_folder):
 							file_hashes[file_path] != digest):
 					if build_coffee(file_path):
 						file_hashes[file_path] = digest
+					else:
+						file_hashes[file_path] = None
+						os.remove("%s.js" % file_path[:-7])
 	write_file_hashes(file_hash_folder, file_hashes)
 
 
