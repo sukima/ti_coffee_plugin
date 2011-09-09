@@ -130,7 +130,8 @@ def build_all_coffee(path, file_hash_folder):
 						file_hashes[file_path] = digest
 					else:
 						file_hashes[file_path] = None
-						os.remove("%s.js" % file_path[:-7])
+						if os.path.exists("%s.js" % file_path[:-7]):
+							os.remove("%s.js" % file_path[:-7])
 	write_file_hashes(file_hash_folder, file_hashes)
 
 
