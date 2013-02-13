@@ -26,6 +26,11 @@ If you'd rather not do that, you can muck around with `~/.MacOSX/environment.pli
 In the folder which houses your Titanium SDKs -- on OS X this would be `/Library/Application Support/Titanium`, create a `plugins/ti_coffee_plugin/1.0` folder.  Put the plugin.py from this repository into that folder.  So on OS X you would have this file:
 
 	/Library/Application Support/Titanium/plugins/ti_coffee_plugin/1.0/plugin.py
+	
+On Ubuntu this would be `~/.titanium`
+
+- Ensure you have the proper folder structure with: `mkdir -p ~/.titanium/plugins/ti_coffee_plugin/1.0/`
+- create or copy `plugin.py` into the `1.0/` folder
 
 Next, you need to tell your Titanium project to run this plugin when the Titanium build scripts build your project.
 
