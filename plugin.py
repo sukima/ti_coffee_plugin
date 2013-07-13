@@ -99,13 +99,17 @@ def build_coffee(path, out):
 	debug('Compiling %s' % path)
 	if not os.path.exists(out):
 		os.makedirs(out)
-	command_args = ['-b', '-c', '-o', out, path]
-	process = subprocess.Popen(args=command_args, executable='coffee', stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+	command_args = ['coffee', '-b', '-c', out, path]
+	process = subprocess.Popen(command_args, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 	result = process.wait()
 	if result != 0:
 		msg = process.stderr.read()
 		if msg:
-			err("%s (%s)" % (msg, path))
+			if msg.find("\n"):
+				msg1 = msg[:msg.find("\n")]
+			else:
+				msg1 = msg
+			err("%s (%s)" % (msg1, path))
 		else:
 			err("CoffeeScript compiler call for %s failed but no error message was generated" % path)
 		return False
@@ -127,6 +131,10 @@ def build_all_coffee(path, dest_root, file_hash_folder):
 				if (not file_path in file_hashes) or (file_hashes[file_path] != digest) or not os.path.isfile(dest_file):
 					if build_coffee(file_path, dest_path):
 						file_hashes[file_path] = digest
+					else:
+						file_hashes[file_path] = None
+						if os.path.exists("%s.js" % file_path[:-7]):
+							os.remove("%s.js" % file_path[:-7])
 	write_file_hashes(file_hash_folder, file_hashes)
 
 
