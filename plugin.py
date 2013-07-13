@@ -95,10 +95,12 @@ def get_md5_digest(path):
 	f.close()
 	return hashlib.md5(contents).hexdigest()
 
-def build_coffee(path):
+def build_coffee(path, out):
 	debug('Compiling %s' % path)
-	command_args = ['coffee', '-b', '-c', path]
-	process = subprocess.Popen(command_args, stdout=subprocess.PIPE, stdin=subprocess.PIPE)
+	if not os.path.exists(out):
+		os.makedirs(out)
+	command_args = ['-b', '-c', '-o', out, path]
+	process = subprocess.Popen(args=command_args, executable='coffee', stdout=subprocess.PIPE, stdin=subprocess.PIPE)
 	result = process.wait()
 	if result != 0:
 		msg = process.stderr.read()
@@ -109,7 +111,7 @@ def build_coffee(path):
 		return False
 	return True
 
-def build_all_coffee(path, file_hash_folder):
+def build_all_coffee(path, dest_root, file_hash_folder):
 	info_msg_shown = False
 	file_hashes = read_file_hashes(file_hash_folder)
 	for root, dirs, files in os.walk(path):
@@ -119,18 +121,20 @@ def build_all_coffee(path, file_hash_folder):
 					info("Compiling CoffeeScript files")
 					info_msg_shown = True
 				file_path = os.path.join(root, name)
+				dest_path = os.path.join(dest_root, os.path.dirname(os.path.relpath(file_path, path)))
+				dest_file = os.path.join(dest_path, "%s.js" % (os.path.splitext(name)[0]))
 				digest = get_md5_digest(file_path)
-				if (not file_path in file_hashes) or (
-							file_hashes[file_path] != digest):
-					if build_coffee(file_path):
+				if (not file_path in file_hashes) or (file_hashes[file_path] != digest) or not os.path.isfile(dest_file):
+					if build_coffee(file_path, dest_path):
 						file_hashes[file_path] = digest
 	write_file_hashes(file_hash_folder, file_hashes)
 
 
 def compile(config, file_hash_folder=None):
+	print config
 	if file_hash_folder is None:
 		file_hash_folder = os.path.abspath(os.path.join(config['build_dir'], '..'))
-	build_all_coffee(os.path.join(config['project_dir'], 'Resources'), file_hash_folder)
+	build_all_coffee(os.path.join(config['project_dir'], 'src'), os.path.join(config['project_dir'], 'Resources'), file_hash_folder)
 
 if __name__ == "__main__":
 	proj_dir = None
