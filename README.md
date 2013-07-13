@@ -17,7 +17,7 @@ First, of course, you'll need the `coffee` command available on your system.  If
 **Also**, if you're on OS X and you used Homebrew to install CoffeeScript and Node.js, GUI applications such as Titanium Developer and Titanium Studio -- which are precisely the apps that launch your Titanium project's build process and thus this plugin -- might not be able to successfully execute `coffee` because `/usr/local/bin` is not in the PATH by default for GUI apps, and changes to `~/.profile`, `/etc/paths`, etc., are not useful for GUI apps.  The easiest solution is to simply symlink `coffee` and `node` in `/usr/bin`, which is in the PATH:
 
     $ sudo ln -s /usr/local/bin/node /usr/bin/node
-	$ sudo ln -s /usr/local/bin/coffee /usr/bin/coffee
+    $ sudo ln -s /usr/local/bin/coffee /usr/bin/coffee
 
 If you'd rather not do that, you can muck around with `~/.MacOSX/environment.plist` following [Apple's instructions](http://developer.apple.com/library/mac/#qa/qa1067/_index.html).
 
@@ -25,8 +25,8 @@ If you'd rather not do that, you can muck around with `~/.MacOSX/environment.pli
 
 In the folder which houses your Titanium SDKs -- on OS X this would be `/Library/Application Support/Titanium`, create a `plugins/ti_coffee_plugin/1.0` folder.  Put the plugin.py from this repository into that folder.  So on OS X you would have this file:
 
-	/Library/Application Support/Titanium/plugins/ti_coffee_plugin/1.0/plugin.py
-	
+    /Library/Application Support/Titanium/plugins/ti_coffee_plugin/1.0/plugin.py
+
 On Ubuntu this would be `~/.titanium`
 
 - Ensure you have the proper folder structure with: `mkdir -p ~/.titanium/plugins/ti_coffee_plugin/1.0/`
@@ -36,10 +36,10 @@ Next, you need to tell your Titanium project to run this plugin when the Titaniu
 
 Build-time plugins for Titanium projects are invoked if the plugin is registered in the project's tiapp.xml file.  For the ti_coffee_plugin, you could do it like this:
 
-	<!-- This is a child element of <ti:app> in tiapp.xml -->
-	<plugins>
-		<plugin version="1.0">ti_coffee_plugin</plugin>
-	</plugins>
+    <!-- This is a child element of <ti:app> in tiapp.xml -->
+    <plugins>
+      <plugin version="1.0">ti_coffee_plugin</plugin>
+    </plugins>
 
 # Sample Application
 
