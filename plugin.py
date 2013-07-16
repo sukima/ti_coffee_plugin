@@ -120,7 +120,7 @@ def build_all_coffee(path, dest_root, file_hash_folder):
 	file_hashes = read_file_hashes(file_hash_folder)
 	for root, dirs, files in os.walk(path):
 		for name in files:
-			if name.endswith('.coffee'):
+			if name.endswith('.coffee') or name.endswith('.litcoffee') or name.endswith('.coffee.md'):
 				if not info_msg_shown:
 					info("Compiling CoffeeScript files")
 					info_msg_shown = True
