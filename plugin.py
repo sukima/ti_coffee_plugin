@@ -99,7 +99,8 @@ def build_coffee(path, out):
 	debug('Compiling %s' % path)
 	if not os.path.exists(out):
 		os.makedirs(out)
-	command_args = ['coffee', '-b', '-c', '-o', out, path]
+	coffee = os.environ.get('COFFEE_PATH', 'coffee') # Allow coffee executable path to be overridden
+	command_args = [coffee, '-b', '-c', '-o', out, path]
 	process = subprocess.Popen(command_args, stdout=subprocess.PIPE, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
 	result = process.wait()
 	if result != 0:
