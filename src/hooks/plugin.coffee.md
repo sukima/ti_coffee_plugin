@@ -154,7 +154,9 @@ Search and find all CoffeeScript files
         lowerCountAndCallBack = -> cb?() unless --count > 0
         # TODO: Remove dependency on unix find tool.
         exec "find #{@src_dir}", (err, stdout) =>
-          throw err if err
+          if err
+            @logger.warn "[ti.coffee] Unable to find any CoffeeScript files in #{@src_dir}"
+            return cb?()
           file_paths = stdout.split("\n")
           for file_path in file_paths
             continue unless file_path.match /\.(lit)?coffee(\.md)?$/

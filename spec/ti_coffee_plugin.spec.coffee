@@ -53,15 +53,24 @@ describe "TiCoffeePlugin", ->
       expect( TiCoffeePlugin::loadHashes ).toHaveBeenCalled()
 
     it "should find all coffee files", ->
-      @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
       flag = false
       runs =>
         @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
         @ti_coffee_plugin.onReady(-> flag = true)
-      waitsFor (-> flag), "findCoffeeFiles()", ASYNC_TIMEOUT
+      waitsFor (-> flag), "constructor", ASYNC_TIMEOUT
       runs =>
         paths = @ti_coffee_plugin.coffee_files.map (x) -> x.src_path
         expect( paths ).toContain FS.cs_file
+
+    it "should still cycle onReady events when no CS files found", ->
+      no_cs_files_cli = argv: { "project-dir": "__NO_CS_FILES_PROJECT_DIR_DOES_NOT_EXIST__" }
+      flag = false
+      runs =>
+        @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, no_cs_files_cli, {})
+        @ti_coffee_plugin.onReady(-> flag = true)
+      waitsFor (-> flag), "constructor", ASYNC_TIMEOUT
+      runs =>
+        expect( @ti_coffee_plugin.coffee_files.length ).toBe 0
 
   describe "hooks", ->
 
