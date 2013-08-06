@@ -36,10 +36,10 @@ describe "TiCoffeePlugin", ->
       it "should call addHook with build.pre.compile", ->
         expect( @cli.addHook ).toHaveBeenCalledWith "clean.post", jasmine.any(Function)
 
-      it "should save a hash file", ->
+      xit "should save a hash file", ->
         expect( FS.exists(FS.getPath("build/#{TiCoffeePlugin.HASH_FILE}")) ).toBeTruthy()
 
-  describe "#constructor", ->
+  xdescribe "#constructor", ->
 
     beforeEach ->
       @addMatchers toIncludeHashEntry: (expected) ->

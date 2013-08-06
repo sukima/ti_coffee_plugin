@@ -30,7 +30,7 @@ describe "CoffeeFile", ->
     afterEach ->
       FS.tearDown()
     
-    describe "#compile", ->
+    xdescribe "#compile", ->
 
       it "should create 'Resource' sub-trees", ->
         flag = false
