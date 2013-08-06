@@ -4,7 +4,7 @@ path       = require "path"
 util       = require "util"
 config     = require "./package.json"
 
-ssh_server = "ktohg@tritarget.org:tritarget.org/files/"
+ssh_server = "tritarget.org:tritarget.org/files/"
 
 zipFile = "#{config.name}-#{config.version}.zip"
 
