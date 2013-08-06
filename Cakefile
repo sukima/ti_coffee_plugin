@@ -36,6 +36,7 @@ task "test", "Run specs", ->
   spawn "jasmine-node", [ "--coffee", "--color", "spec/" ], stdio: "inherit"
 
 task "dist", "Build a zip file for distribution", ->
+  invoke "clean"
   build_dir = "build/#{config.name}/#{significant_version}"
   deep_path = null
   for hook_path in "#{build_dir}/hooks".split("/")
@@ -53,5 +54,5 @@ task "deploy", "Ship the zip to file storage (signed)", ->
   zip_path = path.join("build", zipFile)
   asc_path = "#{zip_path}.asc"
   gpgSign zip_path, (err) ->
-    uploadFile asc_path unless err
     uploadFile zip_path
+    uploadFile asc_path unless err
