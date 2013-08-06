@@ -49,7 +49,7 @@ we allow attaching callback via `onReady`.
 
         createHash: ->
           registerMD5Hash @src_path, (@hash) =>
-            fn(@) for fn in @listeners
+            fn(@) for fn in @listeners if @listeners?
             @listeners = null
 
 ### onReady ###
@@ -63,6 +63,7 @@ Add callbacks to the stack to be executed when the hash is complete.
 ### Compile individual CoffeeFile ###
 
         compile: (logger, cb) ->
+          logger.info "[ti.coffee] Compiling: #{@src_path}"
           command = process.env["COFFEE_PATH"] || "coffee"
           command += " --bare --compile --output #{@dest_dir} #{@src_path}"
           exec command, cb
@@ -73,6 +74,7 @@ We want to remove the generated JS file as well as any directories in the tree
 that become empty after the JS file is removed.
 
         clean: (logger, cb) ->
+          logger.debug "[ti.coffee] Removing generated file: #{@dest_path}"
           rmdir = (dir, cb) ->
             dir = path.dirname(dir)
             fs.rmdir dir, (err) -> unless err then rmdir(dir, cb) else cb?()
@@ -88,6 +90,8 @@ This is the main hook used to perform the compilation.
         for coffee_file in @coffee_files
           if not fs.existsSync(coffee_file.dest_path) or @hashes[coffee_file.src_path] isnt coffee_file.hash
             coffee_file.compile(@logger)
+          else
+            @logger.debug "[ti.coffee] Skipping (not changed): #{coffee_file.src_path}"
         @updateHashes()
         @storeHashes()
         finish()
