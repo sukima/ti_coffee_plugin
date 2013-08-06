@@ -1,0 +1,21 @@
+{
+  "name": "ti.coffee",
+  "version": "2.0.0",
+  "description": "A build-time CoffeeScript compiler plugin for Titanium build scripts - Reborn",
+  "author": "Devin Weaver <suki@tritarget.org> (http://tritarget.org)",
+  "contributors": [
+    "Bill Dawson (https://github.com/billdawson)"
+  ],
+  "devDependencies": {
+    "allsync": "~> 0.0.3",
+    "coffee-script": "~> 1.6.3",
+		"jasmine-node": "~> 1.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sukima/ti_coffee_plugin.git"
+  },
+  "scripts": {
+    "test": "cake test"
+  }
+}
