@@ -7,7 +7,7 @@
     "Bill Dawson (https://github.com/billdawson)"
   ],
   "devDependencies": {
-    "allsync": "~> 0.0.3",
+    "execSync": "~> 1.0.x",
     "coffee-script": "~> 1.6.3",
 		"jasmine-node": "~> 1.2.0"
   },
