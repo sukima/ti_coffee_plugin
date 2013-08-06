@@ -74,11 +74,30 @@ We want to remove the generated JS file as well as any directories in the tree
 that become empty after the JS file is removed.
 
         clean: (logger, cb) ->
-          logger.debug "[ti.coffee] Removing generated file: #{@dest_path}"
+          logger.info "[ti.coffee] Removing generated file: #{@dest_path}"
           rmdir = (dir, cb) ->
             dir = path.dirname(dir)
             fs.rmdir dir, (err) -> unless err then rmdir(dir, cb) else cb?()
           fs.unlink @dest_path, => rmdir(@dest_path, cb)
+
+## Constructor ##
+
+Encapsulate the call back into an object for easier manipulation of the
+environment.
+
+This means storing a reference to `logger`, `config`, `cli`, etc. Allowing the
+call back chain access at any level and controlled through binding.
+
+      constructor: (@logger, @config, @cli, @appc) ->
+        @project_dir    = @cli.argv['project-dir']
+        @build_dir      = path.join @project_dir, "build"
+        @src_dir        = path.join @project_dir, "src"
+        @hash_file_path = path.join @build_dir, TiCoffeePlugin.HASH_FILE
+        @loadHashes()
+        @waitingForFindCoffeeFiles = true
+        @findCoffeeFiles =>
+          @waitingForFindCoffeeFiles = false
+          @finishReady()
 
 ## Hooks ##
 
@@ -105,25 +124,6 @@ Used to clean up generated JS files in `Resources` directory.
         fs.unlink @hash_file_path, -> cb?()
         finish()
 
-## Constructor ##
-
-Encapsulate the call back into an object for easier manipulation of the
-environment.
-
-This means storing a reference to `logger`, `config`, `cli`, etc. Allowing the
-call back chain access at any level and controlled through binding.
-
-      constructor: (@logger, @config, @cli, @appc) ->
-        @project_dir    = @cli.argv['project-dir']
-        @build_dir      = path.join @project_dir, "build"
-        @src_dir        = path.join @project_dir, "src"
-        @hash_file_path = path.join @build_dir, TiCoffeePlugin.HASH_FILE
-        @loadHashes()
-        @waitingForFindCoffeeFiles = true
-        @findCoffeeFiles =>
-          @waitingForFindCoffeeFiles = false
-          @finishReady()
-
 ## Helper Functions ##
 
 ### onReady ###
@@ -140,8 +140,8 @@ Add callbacks to the stack to be executed when the hash is complete.
 Used as a callback to monitor when this object is ready.
 
       finishReady: ->
-        return false unless @waitingForFindCoffeeFiles
-        cb(@) for cb in @listeners
+        return false if @waitingForFindCoffeeFiles
+        cb(@) for cb in @listeners if @listeners?
         @listeners = null
 
 ## findCoffeeFiles ##
