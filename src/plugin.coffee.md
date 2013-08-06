@@ -88,6 +88,8 @@ This is the main hook used to perform the compilation.
         for coffee_file in @coffee_files
           if not fs.existsSync(coffee_file.dest_path) or @hashes[coffee_file.src_path] isnt coffee_file.hash
             coffee_file.compile(@logger)
+        @updateHashes()
+        @storeHashes()
         finish()
 
 ### clean ###
@@ -108,11 +110,16 @@ This means storing a reference to `logger`, `config`, `cli`, etc. Allowing the
 call back chain access at any level and controlled through binding.
 
       constructor: (@logger, @config, @cli, @appc) ->
-        @project_dir = @cli.argv['project-dir']
-        @build_dir = path.join @project_dir, "build"
+        @project_dir    = @cli.argv['project-dir']
+        @build_dir      = path.join @project_dir, "build"
+        @src_dir        = path.join @project_dir, "src"
         @hash_file_path = path.join @build_dir, TiCoffeePlugin.HASH_FILE
-        @findCoffeeFiles()
         @loadHashes()
+        @waitingForFindCoffeeFiles = true
+        @findCoffeeFiles =>
+          @waitingForFindCoffeeFiles = false
+          @finishReady()
+
 ## Helper Functions ##
 
 ### onReady ###
