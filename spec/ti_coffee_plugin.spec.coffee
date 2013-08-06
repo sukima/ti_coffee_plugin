@@ -1,6 +1,9 @@
 describe "TiCoffeePlugin", ->
   TiCoffeePlugin = require "../src/plugin"
 
+  TEST_HASH_DATA      = "test_file": "test_hash"
+  TEST_HASH_FILE_DATA = JSON.stringify(TEST_HASH_DATA)
+
   class MockCoffeeFile
     hash:      ""
     src_path:  "test/file.coffee"
@@ -18,14 +21,16 @@ describe "TiCoffeePlugin", ->
 
   describe "static methods", ->
 
+    beforeEach ->
+      spyOn TiCoffeePlugin::, "findCoffeeFiles"
+      spyOn(TiCoffeePlugin::, "loadHashes")
+
     it "should define a cliVersion", ->
       expect( TiCoffeePlugin.cliVersion ).toEqual jasmine.any(String)
 
     describe "#init", ->
 
       beforeEach ->
-        spyOn TiCoffeePlugin::, "findCoffeeFiles"
-        spyOn TiCoffeePlugin::, "loadHashes"
         TiCoffeePlugin.init(new MockLogger, {}, @cli, {})
 
       it "should call addHook with build.pre.compile", ->
@@ -36,37 +41,31 @@ describe "TiCoffeePlugin", ->
       it "should call addHook with build.pre.compile", ->
         expect( @cli.addHook ).toHaveBeenCalledWith "clean.post", jasmine.any(Function)
 
-      xit "should save a hash file", ->
-        expect( FS.exists(FS.getPath("build/#{TiCoffeePlugin.HASH_FILE}")) ).toBeTruthy()
-
-  xdescribe "#constructor", ->
+  describe "#constructor", ->
 
     beforeEach ->
-      @addMatchers toIncludeHashEntry: (expected) ->
-        nottext = if @isNot then " not" else ""
-        @message = ->
-          "Expected hash object #{@actual.toString()} to#{nottext} include '#{expected}'"
-        @actual[expected]?
-      FS.addFile FS.getPath("build/#{TiCoffeePlugin.HASH_FILE}", """{"test_file":"test_hash"}""")
+      spyOn TiCoffeePlugin::, "findCoffeeFiles"
+      spyOn(TiCoffeePlugin::, "loadHashes")
+      FS.addFile FS.getPath("build/#{TiCoffeePlugin.HASH_FILE}", TEST_HASH_FILE_DATA)
+      @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
 
     it "should load coffee files", ->
-      spyOn TiCoffeePlugin::, "loadHashes"
-      @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
-      paths = @ti_coffee_plugin.coffee_files.map (x) -> x.src_path
-      expect( paths ).toContain FS.cs_file
+      expect( TiCoffeePlugin::findCoffeeFiles ).toHaveBeenCalled()
 
     it "should load stored hashes", ->
-      spyOn TiCoffeePlugin::, "findCoffeeFiles"
-      @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
-      expect( @ti_coffee_plugin.hashes ).toIncludeHashEntry "test_file"
+      expect( TiCoffeePlugin::loadHashes ).toHaveBeenCalled()
 
   describe "hooks", ->
 
     beforeEach ->
+      spyOn TiCoffeePlugin::, "findCoffeeFiles"
+      spyOn(TiCoffeePlugin::, "loadHashes")
       @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
       @coffee_file = new MockCoffeeFile
       @callback_spy = createSpy "finish"
       @ti_coffee_plugin.coffee_files = [ @coffee_file ]
+      @ti_coffee_plugin.waitingForFindCoffeeFiles = false
+
 
     describe "#compile", ->
 
@@ -77,6 +76,11 @@ describe "TiCoffeePlugin", ->
       it "should call CoffeeFile.compile()", ->
         @ti_coffee_plugin.compile({}, @callback_spy)
         expect( @coffee_file.compile ).toHaveBeenCalled()
+
+      it "should save a hash file", ->
+        spyOn @ti_coffee_plugin, "storeHashes"
+        @ti_coffee_plugin.compile({}, @callback_spy)
+        expect( @ti_coffee_plugin.storeHashes ).toHaveBeenCalled()
 
       describe "(hash logic)", ->
 
@@ -112,14 +116,43 @@ describe "TiCoffeePlugin", ->
         flag = false
         test_file = @ti_coffee_plugin.hash_file_path
         FS.addFile test_file, "{}"
-        runs => @ti_coffee_plugin.clean {}, @callback_spy, -> flag = true
+        runs => @ti_coffee_plugin.clean {}, @callback_spy, (-> flag = true)
         waitsFor (-> flag), "clean()", ASYNC_TIMEOUT
         runs => expect( FS.exists(test_file) ).toBeFalsy()
 
-  describe "#loadHashes", ->
+  describe "helper methods", ->
 
-    it "should load the hashes from a JSON file", ->
+    describe "#loadHashes", ->
 
-  describe "#storeHashes", ->
+      it "should load the hashes from a JSON file", ->
+        spyOn TiCoffeePlugin::, "findCoffeeFiles"
+        @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
+        FS.addFile @ti_coffee_plugin.hash_file_path, TEST_HASH_FILE_DATA
+        @ti_coffee_plugin.loadHashes()
+        expect( @ti_coffee_plugin.hashes ).toEqual TEST_HASH_DATA
 
-    it "should save the hashes to a JSON file", ->
+    describe "#storeHashes", ->
+
+      it "should save the hashes to a JSON file", ->
+        spyOn TiCoffeePlugin::, "findCoffeeFiles"
+        spyOn TiCoffeePlugin::, "loadHashes"
+        @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
+        @ti_coffee_plugin.hashes = TEST_HASH_DATA
+        flag = false
+        runs => @ti_coffee_plugin.storeHashes (-> flag = true)
+        waitsFor (-> flag), "storeHashes()", ASYNC_TIMEOUT
+        runs => expect( FS.exists(@ti_coffee_plugin.hash_file_path) ).toBeTruthy()
+
+    describe "#findCoffeeFiles", ->
+
+      it "should find all coffee files", ->
+        spyOn TiCoffeePlugin::, "findCoffeeFiles"
+        spyOn TiCoffeePlugin::, "loadHashes"
+        @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
+        TiCoffeePlugin::findCoffeeFiles.andCallThrough()
+        flag = false
+        runs => @ti_coffee_plugin.findCoffeeFiles (-> flag = true)
+        waitsFor (-> flag), "findCoffeeFiles()", ASYNC_TIMEOUT
+        runs =>
+          paths = @ti_coffee_plugin.coffee_files.map (x) -> x.src_path
+          expect( paths ).toContain FS.cs_file
