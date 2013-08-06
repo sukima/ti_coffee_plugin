@@ -1,0 +1,5 @@
+*.pyc
+*.swp
+build
+tests
+node_modules
