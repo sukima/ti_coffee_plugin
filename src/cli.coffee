@@ -10,11 +10,14 @@ usage = ->
 
 for arg in process.argv.slice(2)
   switch arg
-    when "-c", "--clean"
-      clean = true
     when "-h", "--help"
       usage()
       process.exit 0
+    when "-v", "--version"
+      util.log "Version: #{TiCoffeePlugin.version}"
+      process.exit 0
+    when "-c", "--clean"
+      clean = true
     else
       project_dir = arg
 
