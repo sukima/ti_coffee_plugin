@@ -4,13 +4,21 @@ describe "CoffeeFile", ->
 
   describe "#constructor", ->
 
-    it "should assign a proper dest_dir", ->
+    it "should assign a proper dest_path", ->
       spyOn CoffeeFile::, "createHash"
       expect( new CoffeeFile("src/test.coffee").dest_path ).toBe "Resources/test.js"
       expect( new CoffeeFile("src/test.coffee.md").dest_path ).toBe "Resources/test.js"
       expect( new CoffeeFile("src/test.litcoffee").dest_path ).toBe "Resources/test.js"
       expect( new CoffeeFile("tests/src/test.coffee").dest_path ).toBe "tests/Resources/test.js"
       expect( new CoffeeFile("tests/src/test/test.coffee").dest_path ).toBe "tests/Resources/test/test.js"
+
+    it "should assign a proper dest_dir", ->
+      spyOn CoffeeFile::, "createHash"
+      expect( new CoffeeFile("src/test.coffee").dest_dir ).toBe "Resources"
+      expect( new CoffeeFile("src/test.coffee.md").dest_dir ).toBe "Resources"
+      expect( new CoffeeFile("src/test.litcoffee").dest_dir ).toBe "Resources"
+      expect( new CoffeeFile("tests/src/test.coffee").dest_dir ).toBe "tests/Resources"
+      expect( new CoffeeFile("tests/src/test/test.coffee").dest_dir ).toBe "tests/Resources/test"
 
     it "should assign a hash", ->
       flag = false
@@ -26,11 +34,12 @@ describe "CoffeeFile", ->
     beforeEach ->
       FS.setup()
       @coffee_file = new CoffeeFile(FS.cs_file)
+      @temp_file = FS.getPath("__test_coffee_path__")
 
     afterEach ->
       FS.tearDown()
     
-    xdescribe "#compile", ->
+    describe "#compile", ->
 
       it "should create 'Resource' sub-trees", ->
         flag = false
@@ -40,11 +49,10 @@ describe "CoffeeFile", ->
 
       it "should allow environmental override for coffee command", ->
         flag = false
-        spy = spyOn require("child_process"), "exec"
-        process.env["COFFEE_PATH"] = "__test_coffee_path__"
+        process.env["COFFEE_PATH"] = "touch #{@temp_file} #"
         runs => @coffee_file.compile new MockLogger, -> flag = true
         waitsFor (-> flag), "compile()", ASYNC_TIMEOUT
-        runs => expect( spy ).toHaveBeenCalledWith "__test_coffee_path__"
+        runs => expect( FS.exists(@temp_file) ).toBeTruthy()
 
     describe "#clean", ->
 

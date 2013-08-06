@@ -39,6 +39,7 @@ The hashes are used to skip compilation of files that have not changed.
         constructor: (@src_path) ->
           @listeners = []
           @dest_path = destPathFromSrcPath(@src_path)
+          @dest_dir  = path.dirname(@dest_path)
           @createHash()
 
 ### createHash ###
@@ -62,6 +63,9 @@ Add callbacks to the stack to be executed when the hash is complete.
 ### Compile individual CoffeeFile ###
 
         compile: (logger, cb) ->
+          command = process.env["COFFEE_PATH"] || "coffee"
+          command += " --bare --compile --output #{@dest_dir} #{@src_path}"
+          exec command, cb
 
 ### Clean individual CoffeeFile ###
 
