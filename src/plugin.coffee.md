@@ -144,8 +144,20 @@ Used as a callback to monitor when this object is ready.
 
 Search and find all CoffeeScript files
 
-      findCoffeeFiles: ->
+      findCoffeeFiles: (cb) ->
         @coffee_files = []
+        count = 0
+        lowerCountAndCallBack = -> cb?() unless --count > 0
+        # TODO: Remove dependency on unix find tool.
+        exec "find #{@src_dir}", (err, stdout) =>
+          throw err if err
+          file_paths = stdout.split("\n")
+          for file_path in file_paths
+            continue unless file_path.match /\.(lit)?coffee(\.md)?$/
+            count++
+            coffee_file = new TiCoffeePlugin.CoffeeFile(file_path)
+            coffee_file.onReady lowerCountAndCallBack
+            @coffee_files.push(coffee_file)
 
 ## loadHashes ##
 
@@ -153,13 +165,26 @@ Read the hash file.
 
       loadHashes: ->
         return @hashes = {} unless fs.existsSync(@hash_file_path)
+        @hashes = require(path.resolve(@hash_file_path))
+
+## updateHashes ##
+
+Update the `hashes` based on the loaded `coffee_files`.
+
+      updateHashes: ->
         @hashes = {}
+        for coffee_file in @coffee_files
+          @hashes[coffee_file.src_path] = coffee_file.hash
+        @hashes
 
 ## storeHahses ##
 
 Build the hash file into `build/coffee_file_hashes.json`
 
-      storeHahses: ->
+      storeHashes: (cb) ->
+        fs.writeFile @hash_file_path, JSON.stringify(@hashes), (err) ->
+          throw err if err
+          cb?()
 
 ### registerMD5Hash (private) ##
 
