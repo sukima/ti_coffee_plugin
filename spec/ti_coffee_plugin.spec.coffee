@@ -6,8 +6,8 @@ describe "TiCoffeePlugin", ->
 
   class MockCoffeeFile
     hash:      ""
-    src_path:  "test/file.coffee"
-    dest_path: "test/file.js"
+    src_path:  "tests/file.coffee"
+    dest_path: "tests/file.js"
     compile:   createSpy "compile"
     clean:     createSpy "clean"
 
@@ -86,6 +86,9 @@ describe "TiCoffeePlugin", ->
 
     describe "#compile", ->
 
+      beforeEach ->
+        spyOn @ti_coffee_plugin, "storeHashes"
+
       it "should call finish()", ->
         @ti_coffee_plugin.compile({}, @callback_spy)
         expect( @callback_spy ).toHaveBeenCalled()
@@ -95,7 +98,6 @@ describe "TiCoffeePlugin", ->
         expect( @coffee_file.compile ).toHaveBeenCalled()
 
       it "should save a hash file", ->
-        spyOn @ti_coffee_plugin, "storeHashes"
         @ti_coffee_plugin.compile({}, @callback_spy)
         expect( @ti_coffee_plugin.storeHashes ).toHaveBeenCalled()
 
@@ -159,6 +161,9 @@ describe "TiCoffeePlugin", ->
           @ti_coffee_plugin.onReady =>
             @ti_coffee_plugin.hashes = TEST_HASH_DATA
             @ti_coffee_plugin.coffee_files = [ @coffee_file ]
-            @ti_coffee_plugin.storeHashes(-> flag = true)
+            @ti_coffee_plugin.storeHashes (err) ->
+              flag = true
+              expect( err ).toBeFalsy()
         waitsFor (-> flag), "storeHashes()", ASYNC_TIMEOUT
-        runs => expect( FS.exists(@ti_coffee_plugin.hash_file_path) ).toBeTruthy()
+        runs =>
+          expect( FS.exists(@ti_coffee_plugin.hash_file_path) ).toBeTruthy()

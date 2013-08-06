@@ -188,9 +188,20 @@ Update the `hashes` based on the loaded `coffee_files`.
 Build the hash file into `build/coffee_file_hashes.json`
 
       storeHashes: (cb) ->
-        fs.writeFile @hash_file_path, JSON.stringify(@hashes), (err) ->
-          throw err if err
-          cb?()
+        writeFile = =>
+          fs.writeFile @hash_file_path, JSON.stringify(@hashes), (err) =>
+            @logger.error err
+            cb?(err)
+        fs.exists path.dirname(@hash_file_path), (exists) =>
+          if exists
+            writeFile()
+          else
+            fs.mkdir path.dirname(@hash_file_path), (err) =>
+              if err
+                @logger.error err
+                cb?(err)
+              else
+                writeFile()
 
 ### registerMD5Hash (private) ##
 

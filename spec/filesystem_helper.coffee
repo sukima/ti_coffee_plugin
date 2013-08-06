@@ -12,7 +12,6 @@ class exports.FS
   @exists: existsSync
 
   @setup: =>
-    exec "mkdir -p #{@getPath 'build'}"
     exec "mkdir -p #{@getPath 'src/test_cs_dir'}"
     exec "touch #{@cs_file}"
 
