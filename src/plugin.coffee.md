@@ -37,9 +37,9 @@ The hashes are used to skip compilation of files that have not changed.
       @CoffeeFile: class
 
         constructor: (@src_path) ->
-          @listeners = []
           @dest_path = destPathFromSrcPath(@src_path)
           @dest_dir  = path.dirname(@dest_path)
+          @listeners = []
           @createHash()
 
 ### createHash ###
@@ -84,7 +84,7 @@ that become empty after the JS file is removed.
 
 This is the main hook used to perform the compilation.
 
-      compile: (build, finish) =>
+      compile: (build, finish) => @onReady =>
         for coffee_file in @coffee_files
           if not fs.existsSync(coffee_file.dest_path) or @hashes[coffee_file.src_path] isnt coffee_file.hash
             coffee_file.compile(@logger)
@@ -94,7 +94,7 @@ This is the main hook used to perform the compilation.
 
 Used to clean up generated JS files in `Resources` directory.
 
-      clean: (build, finish, cb) =>
+      clean: (build, finish, cb) => @onReady =>
         coffee_file.clean(@logger) for coffee_file in @coffee_files
         fs.unlink @hash_file_path, -> cb?()
         finish()
@@ -113,6 +113,25 @@ call back chain access at any level and controlled through binding.
         @hash_file_path = path.join @build_dir, TiCoffeePlugin.HASH_FILE
         @findCoffeeFiles()
         @loadHashes()
+## Helper Functions ##
+
+### onReady ###
+
+Add callbacks to the stack to be executed when the hash is complete.
+
+      onReady: (callback) ->
+        return callback(@) unless @waitingForFindCoffeeFiles
+        @listeners ?= []
+        @listeners.push callback
+
+### finishReady ###
+
+Used as a callback to monitor when this object is ready.
+
+      finishReady: ->
+        return false unless @waitingForFindCoffeeFiles
+        cb(@) for cb in @listeners
+        @listeners = null
 
 ## findCoffeeFiles ##
 
@@ -135,9 +154,7 @@ Build the hash file into `build/coffee_file_hashes.json`
 
       storeHahses: ->
 
-## Helper Functions ##
-
-### registerMD5Hash ##
+### registerMD5Hash (private) ##
 
 Create an MD5 hash from a file then pass it to a callback.
 
@@ -148,7 +165,7 @@ Create an MD5 hash from a file then pass it to a callback.
       f.on "data", (data) -> md5sum.update(data)
       f.on "end", -> callback md5sum.digest("hex")
 
-### destPathFromSrcPath ###
+### destPathFromSrcPath (private) ###
 
 Build the destination path based on the source path. Essentially convert
 `src/some/path.coffee` to `Resources/some/path.js`.
