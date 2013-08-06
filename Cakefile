@@ -6,7 +6,8 @@ config     = require "./package.json"
 
 ssh_server = "tritarget.org:tritarget.org/files/"
 
-zipFile = "#{config.name}-#{config.version}.zip"
+significant_version = config.version.replace /(\d+\.\d+)\.\d+/, "$1"
+zipFile = "#{config.name}-#{significant_version}.zip"
 
 zip = (file, dir) ->
   code = exec "cd '#{dir}' && zip -r -b /tmp '#{file}' ."
@@ -35,7 +36,7 @@ task "test", "Run specs", ->
   spawn "jasmine-node", [ "--coffee", "--color", "spec/" ], stdio: "inherit"
 
 task "dist", "Build a zip file for distribution", ->
-  build_dir = "build/#{config.name}/#{config.version}"
+  build_dir = "build/#{config.name}/#{significant_version}"
   deep_path = null
   for hook_path in "#{build_dir}/hooks".split("/")
     deep_path = if deep_path? then "#{deep_path}/#{hook_path}" else hook_path
