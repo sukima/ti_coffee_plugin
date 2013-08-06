@@ -1,5 +1,5 @@
 describe "TiCoffeePlugin", ->
-  TiCoffeePlugin = require "../src/plugin"
+  TiCoffeePlugin = require "../src/hooks/plugin"
 
   TEST_HASH_DATA      = "test_file": "test_hash"
   TEST_HASH_FILE_DATA = JSON.stringify(TEST_HASH_DATA)

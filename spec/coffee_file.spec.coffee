@@ -1,8 +1,12 @@
 describe "CoffeeFile", ->
   path         = require "path"
-  {CoffeeFile} = require "../src/plugin"
+  {CoffeeFile} = require "../src/hooks/plugin"
 
   describe "#constructor", ->
+
+    beforeEach -> FS.setup()
+
+    afterEach -> FS.tearDown()
 
     it "should assign a proper dest_path", ->
       spyOn CoffeeFile::, "createHash"
@@ -22,7 +26,7 @@ describe "CoffeeFile", ->
 
     it "should assign a hash", ->
       flag = false
-      coffee_file = new CoffeeFile("src/plugin.coffee.md")
+      coffee_file = new CoffeeFile(FS.cs_file)
       runs => coffee_file.onReady -> flag = true
       waitsFor (-> flag), "onReady", ASYNC_TIMEOUT
       runs =>

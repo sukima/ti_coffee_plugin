@@ -42,7 +42,7 @@ task "dist", "Build a zip file for distribution", ->
     fs.mkdirSync deep_path unless fs.existsSync deep_path
   unless fs.existsSync "#{build_dir}/plugin.py"
     fs.linkSync "plugin.py", "#{build_dir}/plugin.py"
-  code = exec "coffee --bare --output '#{build_dir}/hooks' --compile 'src/plugin.coffee.md'"
+  code =  exec "coffee --bare --output '#{build_dir}' --compile src"
   unless code
     util.log "Compiled plugin."
     zip zipFile, "build"
