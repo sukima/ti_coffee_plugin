@@ -106,14 +106,18 @@ call back chain access at any level and controlled through binding.
 This is the main hook used to perform the compilation.
 
       compile: (build, finish) => @onReady =>
+        waitingForCompiled = 0
+        lowerWaitingForCompiledAndFinish = (err) =>
+          @logger.error err if err
+          finish() unless --waitingForCompiled > 0
         for coffee_file in @coffee_files
           if not fs.existsSync(coffee_file.dest_path) or @hashes[coffee_file.src_path] isnt coffee_file.hash
-            coffee_file.compile(@logger)
+            waitingForCompiled++
+            coffee_file.compile(@logger, lowerWaitingForCompiledAndFinish)
           else
             @logger.debug "[ti.coffee] Skipping (not changed): #{coffee_file.src_path}"
         @updateHashes()
         @storeHashes()
-        finish()
 
 ### clean ###
 

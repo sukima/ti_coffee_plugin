@@ -5,11 +5,12 @@ describe "TiCoffeePlugin", ->
   TEST_HASH_FILE_DATA = JSON.stringify(TEST_HASH_DATA)
 
   class MockCoffeeFile
+    constructor: ->
+      @compile = createSpy "compile"
+      @clean   = createSpy "clean"
     hash:      ""
     src_path:  "tests/file.coffee"
     dest_path: "tests/file.js"
-    compile:   createSpy "compile"
-    clean:     createSpy "clean"
 
   beforeEach ->
     FS.setup()
@@ -83,15 +84,24 @@ describe "TiCoffeePlugin", ->
       @ti_coffee_plugin.coffee_files = [ @coffee_file ]
       @ti_coffee_plugin.waitingForFindCoffeeFiles = false
 
-
     describe "#compile", ->
 
       beforeEach ->
         spyOn @ti_coffee_plugin, "storeHashes"
 
-      it "should call finish()", ->
-        @ti_coffee_plugin.compile({}, @callback_spy)
-        expect( @callback_spy ).toHaveBeenCalled()
+      it "should not call finish() before compile is done", ->
+        # Yes this one is complicated, please don't hate me
+        flag = false
+        coffee_file_spy = new MockCoffeeFile
+        coffee_file_spy.compile.andCallFake =>
+          setTimeout (=>
+            expect( @callback_spy ).not.toHaveBeenCalled()
+            flag = true
+          ), 0
+        @ti_coffee_plugin.coffee_files = [ coffee_file_spy ]
+        runs => @ti_coffee_plugin.compile("foobar", @callback_spy)
+        waitsFor (-> flag), "finish()", ASYNC_TIMEOUT
+        runs => expect( coffee_file_spy.compile ).toHaveBeenCalled()
 
       it "should call CoffeeFile.compile()", ->
         @ti_coffee_plugin.compile({}, @callback_spy)
