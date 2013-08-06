@@ -1,7 +1,7 @@
 class exports.FS
   {writeFileSync,existsSync} = require "fs"
   {dirname,basename}         = require "path"
-  {exec}                     = require "execSync"
+  {run:exec}                 = require "execSync"
 
   @BASE_PATH:      "tests"
   @getPath:        (path) => "#{@BASE_PATH}/#{path}"
