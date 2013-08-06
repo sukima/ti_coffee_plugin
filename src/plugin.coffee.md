@@ -96,7 +96,7 @@ Used to clean up generated JS files in `Resources` directory.
 
       clean: (build, finish, cb) =>
         coffee_file.clean(@logger) for coffee_file in @coffee_files
-        fs.unlink @hash_file_path, cb
+        fs.unlink @hash_file_path, -> cb?()
         finish()
 
 ## Constructor ##
