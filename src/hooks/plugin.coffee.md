@@ -194,7 +194,7 @@ Build the hash file into `build/coffee_file_hashes.json`
       storeHashes: (cb) ->
         writeFile = =>
           fs.writeFile @hash_file_path, JSON.stringify(@hashes), (err) =>
-            @logger.error err
+            @logger.error err if err
             cb?(err)
         fs.exists path.dirname(@hash_file_path), (exists) =>
           if exists
