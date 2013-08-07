@@ -6,7 +6,18 @@ clean = false
 project_dir = null
 
 usage = ->
-  util.log "Usage: cli.js [--clean] <project-dir>"
+  util.log "Usage: cli.js [options] <project-dir>"
+  util.log "  -h,--help     this cruft"
+  util.log "  -v,--version  print the version of the plugin"
+  util.log "  -l,--legacy   convert directory to legacy structure"
+  util.log "  -c,--clean    remove any generated JS files"
+
+convertToLegacy = ->
+  fs = require "fs"
+  src_path = path.resolve path.join(__dirname, "plugin.py")
+  dest_path = path.resolve path.join(__dirname, "..", "plugin.py")
+  fs.createReadStream(src_path).pipe(fs.createWriteStream(dest_path));
+  util.log "Copied #{src_path} to #{dest_path}"
 
 for arg in process.argv.slice(2)
   switch arg
@@ -15,6 +26,9 @@ for arg in process.argv.slice(2)
       process.exit 0
     when "-v", "--version"
       util.log "Version: #{TiCoffeePlugin.version}"
+      process.exit 0
+    when "-l", "--legacy"
+      convertToLegacy()
       process.exit 0
     when "-c", "--clean"
       clean = true
