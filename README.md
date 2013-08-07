@@ -1,6 +1,6 @@
 # [CoffeeScript][] -> Javascript compiler plugin for Titanium Projects.
 
-[![Build Status](https://travis-ci.org/sukima/ti_coffee_plugin.png?branch=upgrade_3.1.1.GA)](https://travis-ci.org/sukima/ti_coffee_plugin)
+[![Build Status](https://travis-ci.org/sukima/ti_coffee_plugin.png?branch=master)](https://travis-ci.org/sukima/ti_coffee_plugin)
 
 The ti_coffee_plugin simply scans your Titanium project's `src` folder at build time and looks for files with the `.coffee` extension. When it finds such files, it runs the CoffeeScript compiler (`coffee -c`) to produce a Javascript file of the same name and places it into the `Resources` directory with the same tree structure.  E.g., `src/ui/win.coffee` would become `Resources/ui/win.js`.
 
