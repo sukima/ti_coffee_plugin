@@ -5,8 +5,6 @@ description: A build-time CoffeeScript compiler plugin for Titanium build script
 ---
 ### <a name="a-coffeescript---javascript-compiler-plugin-for-titanium" class="anchor" href="#a-coffeescript---javascript-compiler-plugin-for-titanium"><span class="octicon octicon-link"></span></a>A CoffeeScript -&gt; JavaScript compiler plugin for Titanium
 
-**Version: 2.0.3**
-
 This plugin has been tested with Titanium SDK 2.x and 3.x.
 
 This project has been reborn from <a href="https://github.com/billdawson" class="user-mention">@billdawson</a>'s [version](https://github.com/billdawson/ti_coffee_plugin).
@@ -18,7 +16,7 @@ This project has been reborn from <a href="https://github.com/billdawson" class=
 The plugin needs to be extracted to the correct location for the Titanium build system to find it. There are currently two places you can save this plugin: *System* or *Project*.
 
 1. Download an unzip the archive.
-2. Place the unzipped contents in on of the following location.
+2. Place the unzipped contents in one of the following location.
 3. Add a `<plugins>` entry to your `tiapp.xml`.
 
 #### System
@@ -31,7 +29,21 @@ On Mac OS X this seems to be:
 
 #### Project
 
-To make this plugin available for a specific project place the contents of the zip archive into a `plugins` folder in the project root.
+To make this plugin available for a specific project you will have to remove the version directory from the archive. Unzip the archive and move all files and directories in `ti.coffee/{{ site.short_version }}` to `ti.coffee` directory.
+
+For example Titanium will look in your project root for the following directory structure to load this plugin:
+
+    |- 📄 tiapp.xml
+    |- 📂 Resources/
+    \- 📂 plugins/
+       \- 📂 ti.coffee/
+          |- 📄 plugin.py
+          |- 📄 cli.js
+          \- 📂 hooks/
+             \- 📄 plugin.js
+
+If you don't do this Titanium will ignore the plugin and never compile your CoffeeScript files.
+<nobr>( 🚫 ☕  = 😭 )</nobr>
 
 #### tiapp.xml
 
@@ -39,23 +51,6 @@ To activate the plugin add an entry for it in your `tiapp.xml` file:
 
 {% highlight xml %}
 <plugins>
-  <plugin version="2.0">ti.coffee</plugin>
+  <plugin version="{{ site.short_version }}">ti.coffee</plugin>
 </plugins>
 {% endhighlight %}
-
-### <a name="android" class="anchor" href="#android"><span class="octicon octicon-link"></span></a>Android and Titanium SDK &lt; 3.X (legacy)
-
-As of Titanium SDK 3.1.1.GA Android build still use the legacy 2.X build system based on python. In the 2.X build system project based plugins used a different directory structure the what is packaged in the zip file. If you plan on including this in your *project* which is built on the 2.X build system or to build Android you will have to convert the directory tree.
-
-**You do not need to do this if the plugin is installed system wide (see above)**
-
-The easy way if you have node installed is to run the conversion utility:
-
-    $ node /path/to/project/plugins/ti.coffee/2.0/cli.js --legacy
-
-Or to do so manually just copy the `plugin.py` file to the root of the plugin:
-
-    $ cp /path/to/project/plugins/ti.coffee/2.0/plugin.py /path/to/project/plugins/ti.coffee/plugin.py
-
-(Notice we just moved the `plugin.py` file above the version directory).
-

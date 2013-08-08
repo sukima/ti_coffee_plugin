@@ -1,3 +1,7 @@
 source:      .
 destination: ./_site
 layouts:     ./_layouts
+
+# Site Variables
+version:       2.0.4
+short_version: 2.0
