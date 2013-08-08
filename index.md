@@ -33,17 +33,17 @@ To make this plugin available for a specific project you will have to remove the
 
 For example Titanium will look in your project root for the following directory structure to load this plugin:
 
-    |- 📄 tiapp.xml
-    |- 📂 Resources/
-    \- 📂 plugins/
-       \- 📂 ti.coffee/
-          |- 📄 plugin.py
-          |- 📄 cli.js
-          \- 📂 hooks/
-             \- 📄 plugin.js
+    |- :page_facing_up: tiapp.xml
+    |- :open_file_folder: Resources/
+    \- :open_file_folder: plugins/
+       \- :open_file_folder: ti.coffee/
+          |- :page_facing_up: plugin.py
+          |- :page_facing_up: cli.js
+          \- :open_file_folder: hooks/
+             \- :page_facing_up: plugin.js
 
 If you don't do this Titanium will ignore the plugin and never compile your CoffeeScript files.
-<nobr>( 🚫 ☕  = 😭 )</nobr>
+<nobr>( :no_entry_sign: :coffee: = :sob: )</nobr>
 
 #### tiapp.xml
 

@@ -8,6 +8,8 @@
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/emojify.min.css">
+    <script type="text/javascript" src="javascripts/emojify.min.js"></script>
 
     <!--[if lt IE 9]>
     <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
@@ -44,7 +46,7 @@
             .asc file
           </a>
 
-          <p class="repo-owner">Author's <a href="https://tritarget.org/key">PGP Key 🔐</a>.</p>
+          <p class="repo-owner">:closed_lock_with_key: Author's <a href="https://tritarget.org/key">PGP Key</a>.</p>
 
           <p class="repo-owner"><a href="https://github.com/sukima/ti_coffee_plugin">ti.coffee</a> is maintained by <a href="https://github.com/sukima">sukima</a>.</p>
 
@@ -53,6 +55,18 @@
       </div>
     </div>
 
-  
+    <script type="text/javascript">
+      emojify.setConfig({
+        emojify_tag_type: 'span',
+        emoticons_enabled: false,
+        people_enabled: true,
+        nature_enabled: true,
+        objects_enabled: true,
+        places_enabled: true,
+        symbols_enabled: true
+      });
+      emojify.run()
+    </script>
+
   </body>
 </html>
