@@ -24,8 +24,12 @@ attach it to the `build.pre.compile` hook.
 
       @init: (logger, config, cli, appc) =>
         ti_coffee_plugin = new TiCoffeePlugin(logger, config, cli, appc)
+        logger.info "[ti.coffee] Loaded plugin"
         cli.addHook "build.pre.compile", priority: 10, post: ti_coffee_plugin.compile
+        logger.debug "[ti.coffee] Added build.pre.compile hook"
         cli.addHook "clean.post", ti_coffee_plugin.clean
+        logger.debug "[ti.coffee] Added clean.post hook"
+        return
 
 ## CoffeeFile ##
 
@@ -66,6 +70,7 @@ Add callbacks to the stack to be executed when the hash is complete.
           logger.info "[ti.coffee] Compiling: #{@src_path}"
           command = process.env["COFFEE_PATH"] || "coffee"
           command += " --bare --compile --output #{@dest_dir} #{@src_path}"
+          logger.debug "[ti.coffee] Executing: #{command}"
           exec command, cb
 
 ### Clean individual CoffeeFile ###
@@ -118,6 +123,7 @@ This is the main hook used to perform the compilation.
             @logger.debug "[ti.coffee] Skipping (not changed): #{coffee_file.src_path}"
         @updateHashes()
         @storeHashes()
+        return
 
 ### clean ###
 
@@ -127,6 +133,7 @@ Used to clean up generated JS files in `Resources` directory.
         coffee_file.clean(@logger) for coffee_file in @coffee_files
         fs.unlink @hash_file_path, -> cb?()
         finish()
+        return
 
 ## Helper Functions ##
 
