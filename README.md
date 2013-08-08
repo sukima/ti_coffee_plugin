@@ -4,6 +4,10 @@
 
 The ti_coffee_plugin simply scans your Titanium project's `src` folder at build time and looks for files with the `.coffee` extension. When it finds such files, it runs the CoffeeScript compiler (`coffee -c`) to produce a Javascript file of the same name and places it into the `Resources` directory with the same tree structure.  E.g., `src/ui/win.coffee` would become `Resources/ui/win.js`.
 
+This plugin has been updated for the Titanium SDK 3.X build system. However, **The following documentation maybe outdated.** The [main webpage][1] might have more updated information. Also please feel free to contribute changes to keep this README current.
+
+[1]: http://sukima.github.io/ti_coffee_plugin/
+
 # Setup
 
 (In addition to these instructions, see also videos concerning using this with [Titanium Mobile](http://www.youtube.com/watch?v=Jxu_5wcS9YY) and [Titanium Desktop](http://www.youtube.com/watch?v=2ikb-4tdygg).)

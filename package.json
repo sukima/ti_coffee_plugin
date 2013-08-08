@@ -17,5 +17,9 @@
   },
   "scripts": {
     "test": "cake test"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=0.8"
   }
 }
