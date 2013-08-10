@@ -10,7 +10,7 @@ significant_version = config.version.replace /(\d+\.\d+)\.\d+/, "$1"
 zipFile = "#{config.name}-#{significant_version}.zip"
 
 zip = (file, dir) ->
-  code = exec "cd '#{dir}' && zip -r -b /tmp '#{file}' ."
+  code = exec "cd '#{dir}' && zip -r -b /tmp '#{file}' . && chmod 644 '#{file}'"
   util.log "Created #{dir}/#{file}" unless code
 
 gpgSign = (file, cb) ->
