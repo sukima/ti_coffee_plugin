@@ -8,21 +8,43 @@ describe "CoffeeFile", ->
 
     afterEach -> FS.tearDown()
 
-    it "should assign a proper dest_path", ->
-      spyOn CoffeeFile::, "createHash"
-      expect( new CoffeeFile("src/test.coffee").dest_path ).toBe "Resources/test.js"
-      expect( new CoffeeFile("src/test.coffee.md").dest_path ).toBe "Resources/test.js"
-      expect( new CoffeeFile("src/test.litcoffee").dest_path ).toBe "Resources/test.js"
-      expect( new CoffeeFile("tests/src/test.coffee").dest_path ).toBe "tests/Resources/test.js"
-      expect( new CoffeeFile("tests/src/test/test.coffee").dest_path ).toBe "tests/Resources/test/test.js"
+    describe "path converting", ->
 
-    it "should assign a proper dest_dir", ->
-      spyOn CoffeeFile::, "createHash"
-      expect( new CoffeeFile("src/test.coffee").dest_dir ).toBe "Resources"
-      expect( new CoffeeFile("src/test.coffee.md").dest_dir ).toBe "Resources"
-      expect( new CoffeeFile("src/test.litcoffee").dest_dir ).toBe "Resources"
-      expect( new CoffeeFile("tests/src/test.coffee").dest_dir ).toBe "tests/Resources"
-      expect( new CoffeeFile("tests/src/test/test.coffee").dest_dir ).toBe "tests/Resources/test"
+      beforeEach ->
+        spyOn CoffeeFile::, "createHash"
+
+      it "should convert CoffeeScript extention to JavaScript extention", ->
+        expect( new CoffeeFile("src/test.coffee").dest_path ).toMatch /\.js$/
+        expect( new CoffeeFile("src/test.coffee.md").dest_path ).toMatch /\.js$/
+        expect( new CoffeeFile("src/test.litcoffee").dest_path ).toMatch /\.js$/
+
+      describe "for basic app", ->
+
+        it "should assign a proper dest_path", ->
+          expect( new CoffeeFile("src/test.coffee").dest_path ).toBe "Resources/test.js"
+          expect( new CoffeeFile("src/test/test.coffee").dest_path ).toBe "Resources/test/test.js"
+          expect( new CoffeeFile("prefix/src/test.coffee").dest_path ).toBe "prefix/Resources/test.js"
+          expect( new CoffeeFile("prefix/src/test/test.coffee").dest_path ).toBe "prefix/Resources/test/test.js"
+
+        it "should assign a proper dest_dir", ->
+          expect( new CoffeeFile("src/test.coffee").dest_dir ).toBe "Resources"
+          expect( new CoffeeFile("src/test/test.coffee").dest_dir ).toBe "Resources/test"
+          expect( new CoffeeFile("prefix/src/test.coffee").dest_dir ).toBe "prefix/Resources"
+          expect( new CoffeeFile("prefix/src/test/test.coffee").dest_dir ).toBe "prefix/Resources/test"
+
+      describe "for alloy", ->
+
+        it "should assign a proper dest_path", ->
+          expect( new CoffeeFile("src/alloy/test.coffee").dest_path ).toBe "alloy/test.js"
+          expect( new CoffeeFile("src/alloy/test/test.coffee").dest_path ).toBe "alloy/test/test.js"
+          expect( new CoffeeFile("prefix/src/alloy/test.coffee").dest_path ).toBe "prefix/alloy/test.js"
+          expect( new CoffeeFile("prefix/src/alloy/test/test.coffee").dest_path ).toBe "prefix/alloy/test/test.js"
+
+        it "should assign a proper dest_dir", ->
+          expect( new CoffeeFile("src/alloy/test.coffee").dest_dir ).toBe "alloy"
+          expect( new CoffeeFile("src/alloy/test/test.coffee").dest_dir ).toBe "alloy/test"
+          expect( new CoffeeFile("prefix/src/alloy/test.coffee").dest_dir ).toBe "prefix/alloy"
+          expect( new CoffeeFile("prefix/src/alloy/test/test.coffee").dest_dir ).toBe "prefix/alloy/test"
 
     it "should assign a hash", ->
       flag = false
@@ -42,7 +64,7 @@ describe "CoffeeFile", ->
 
     afterEach ->
       FS.tearDown()
-    
+
     describe "#compile", ->
 
       it "should create 'Resource' sub-trees", ->

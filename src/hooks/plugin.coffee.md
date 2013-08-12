@@ -231,7 +231,6 @@ Build the destination path based on the source path. Essentially convert
 `src/some/path.coffee` to `Resources/some/path.js`.
 
     destPathFromSrcPath = (src_path) ->
-      components = src_path.split "/"
-      components = components.map (i) -> if i is "src" then "Resources" else i
-      dest_path = components.join "/"
-      dest_path.replace /\.(lit)?coffee(\.md)?/, ".js"
+      src_path.replace(/(^|\/)src\/alloy\//, "$1alloy/")
+        .replace(/(^|\/)src\//, "$1Resources/")
+        .replace(/\.(lit)?coffee(\.md)?/, ".js")
