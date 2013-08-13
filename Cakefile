@@ -28,8 +28,10 @@ uploadFile = (file) ->
   exec "scp '#{file}' '#{ssh_server}#{path.basename(file)}'"
 
 task "clean", "Removes the build directory", ->
-  exec "rm -rf build"
+  exec("rm -rf build")
   util.log "build directory destroyed."
+  exec("rm -rf _site")
+  util.log "_site directory destroyed."
 
 task "test", "Run specs", ->
   {spawn} = require "child_process"
