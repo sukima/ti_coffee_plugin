@@ -13,6 +13,16 @@ This project has been reborn from <a href="https://github.com/billdawson" class=
 
 ### <a name="how-to-use" class="anchor" href="#how-to-use"><span class="octicon octicon-link"></span></a>How to use
 
+This plugin will compile CoffeeScript files into JavaScript files using the following conventions:
+
+- Any CoffeeScript files in the `src/` directory will compile to JavaScript into the `Resources/` directory.
+- Any CoffeeScript files in the `src/alloy/` directory will compile to JavaScript into the `alloy/` directory.
+- Any CoffeeScript files in the `alloy/` directory will compile to JavaScript into the `alloy/` directory.<sup>\*</sup>
+
+<sup>\*</sup> This was to allow alloy only projects to keep source files coupled with the XML and TSS assets.
+
+### Installing
+
 The plugin needs to be extracted to the correct location for the Titanium build system to find it. There are currently two places you can save this plugin: *System* or *Project*.
 
 1. Download an unzip the archive.
