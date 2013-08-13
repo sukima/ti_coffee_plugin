@@ -97,6 +97,7 @@ call back chain access at any level and controlled through binding.
         @project_dir    = @cli.argv['project-dir']
         @build_dir      = path.join @project_dir, "build"
         @src_dir        = path.join @project_dir, "src"
+        @alloy_dir      = path.join @project_dir, "alloy"
         @hash_file_path = path.join @build_dir, TiCoffeePlugin.HASH_FILE
         @loadHashes()
         @waitingForFindCoffeeFiles = true
@@ -164,9 +165,9 @@ Search and find all CoffeeScript files
         count = 0
         lowerCountAndCallBack = -> cb?() unless --count > 0
         # TODO: Remove dependency on unix find tool.
-        exec "find #{@src_dir}", (err, stdout) =>
+        exec "find #{@src_dir} #{@alloy_dir}", (err, stdout) =>
           if err
-            @logger.warn "[ti.coffee] Unable to find any CoffeeScript files in #{@src_dir}"
+            @logger.warn "[ti.coffee] Unable to find any CoffeeScript files in #{@src_dir} or #{@alloy_dir}"
             return cb?()
           file_paths = stdout.split("\n")
           for file_path in file_paths

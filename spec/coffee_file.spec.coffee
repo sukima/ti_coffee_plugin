@@ -25,12 +25,14 @@ describe "CoffeeFile", ->
           expect( new CoffeeFile("src/test/test.coffee").dest_path ).toBe "Resources/test/test.js"
           expect( new CoffeeFile("prefix/src/test.coffee").dest_path ).toBe "prefix/Resources/test.js"
           expect( new CoffeeFile("prefix/src/test/test.coffee").dest_path ).toBe "prefix/Resources/test/test.js"
+          expect( new CoffeeFile("prefix/test/test.coffee").dest_path ).toBe "prefix/test/test.js"
 
         it "should assign a proper dest_dir", ->
           expect( new CoffeeFile("src/test.coffee").dest_dir ).toBe "Resources"
           expect( new CoffeeFile("src/test/test.coffee").dest_dir ).toBe "Resources/test"
           expect( new CoffeeFile("prefix/src/test.coffee").dest_dir ).toBe "prefix/Resources"
           expect( new CoffeeFile("prefix/src/test/test.coffee").dest_dir ).toBe "prefix/Resources/test"
+          expect( new CoffeeFile("prefix/test/test.coffee").dest_dir ).toBe "prefix/test"
 
       describe "for alloy", ->
 
@@ -39,12 +41,14 @@ describe "CoffeeFile", ->
           expect( new CoffeeFile("src/alloy/test/test.coffee").dest_path ).toBe "alloy/test/test.js"
           expect( new CoffeeFile("prefix/src/alloy/test.coffee").dest_path ).toBe "prefix/alloy/test.js"
           expect( new CoffeeFile("prefix/src/alloy/test/test.coffee").dest_path ).toBe "prefix/alloy/test/test.js"
+          expect( new CoffeeFile("prefix/test/test.coffee").dest_path ).toBe "prefix/test/test.js"
 
         it "should assign a proper dest_dir", ->
           expect( new CoffeeFile("src/alloy/test.coffee").dest_dir ).toBe "alloy"
           expect( new CoffeeFile("src/alloy/test/test.coffee").dest_dir ).toBe "alloy/test"
           expect( new CoffeeFile("prefix/src/alloy/test.coffee").dest_dir ).toBe "prefix/alloy"
           expect( new CoffeeFile("prefix/src/alloy/test/test.coffee").dest_dir ).toBe "prefix/alloy/test"
+          expect( new CoffeeFile("prefix/test/test.coffee").dest_dir ).toBe "prefix/test"
 
     it "should assign a hash", ->
       flag = false
