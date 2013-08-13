@@ -62,7 +62,7 @@ describe "TiCoffeePlugin", ->
       runs =>
         paths = @ti_coffee_plugin.coffee_files.map (x) -> x.src_path
         expect( paths ).toContain FS.cs_file
-        expect( paths ).toContain FS.alloy_file
+        expect( paths ).toContain alloy_file for alloy_file in FS.alloy_files
 
     it "should still cycle onReady events when no CS files found", ->
       no_cs_files_cli = argv: { "project-dir": "__NO_CS_FILES_PROJECT_DIR_DOES_NOT_EXIST__" }

@@ -37,17 +37,19 @@ describe "CoffeeFile", ->
       describe "for alloy", ->
 
         it "should assign a proper dest_path", ->
-          expect( new CoffeeFile("src/alloy/test.coffee").dest_path ).toBe "alloy/test.js"
-          expect( new CoffeeFile("src/alloy/test/test.coffee").dest_path ).toBe "alloy/test/test.js"
-          expect( new CoffeeFile("prefix/src/alloy/test.coffee").dest_path ).toBe "prefix/alloy/test.js"
-          expect( new CoffeeFile("prefix/src/alloy/test/test.coffee").dest_path ).toBe "prefix/alloy/test/test.js"
+          expect( new CoffeeFile("src/alloy/test.coffee").dest_path ).toBe "app/test.js"
+          expect( new CoffeeFile("src/alloy/test/test.coffee").dest_path ).toBe "app/test/test.js"
+          expect( new CoffeeFile("prefix/src/alloy/test.coffee").dest_path ).toBe "prefix/app/test.js"
+          expect( new CoffeeFile("prefix/src/alloy/test/test.coffee").dest_path ).toBe "prefix/app/test/test.js"
+          expect( new CoffeeFile("prefix/app/test.coffee").dest_path ).toBe "prefix/app/test.js"
           expect( new CoffeeFile("prefix/test/test.coffee").dest_path ).toBe "prefix/test/test.js"
 
         it "should assign a proper dest_dir", ->
-          expect( new CoffeeFile("src/alloy/test.coffee").dest_dir ).toBe "alloy"
-          expect( new CoffeeFile("src/alloy/test/test.coffee").dest_dir ).toBe "alloy/test"
-          expect( new CoffeeFile("prefix/src/alloy/test.coffee").dest_dir ).toBe "prefix/alloy"
-          expect( new CoffeeFile("prefix/src/alloy/test/test.coffee").dest_dir ).toBe "prefix/alloy/test"
+          expect( new CoffeeFile("src/alloy/test.coffee").dest_dir ).toBe "app"
+          expect( new CoffeeFile("src/alloy/test/test.coffee").dest_dir ).toBe "app/test"
+          expect( new CoffeeFile("prefix/src/alloy/test.coffee").dest_dir ).toBe "prefix/app"
+          expect( new CoffeeFile("prefix/src/alloy/test/test.coffee").dest_dir ).toBe "prefix/app/test"
+          expect( new CoffeeFile("prefix/app/test.coffee").dest_dir ).toBe "prefix/app"
           expect( new CoffeeFile("prefix/test/test.coffee").dest_dir ).toBe "prefix/test"
 
     it "should assign a hash", ->

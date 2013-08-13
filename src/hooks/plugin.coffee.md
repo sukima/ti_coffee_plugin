@@ -97,7 +97,7 @@ call back chain access at any level and controlled through binding.
         @project_dir    = @cli.argv['project-dir']
         @build_dir      = path.join @project_dir, "build"
         @src_dir        = path.join @project_dir, "src"
-        @alloy_dir      = path.join @project_dir, "alloy"
+        @alloy_dir      = path.join @project_dir, "app"
         @hash_file_path = path.join @build_dir, TiCoffeePlugin.HASH_FILE
         @loadHashes()
         @waitingForFindCoffeeFiles = true
@@ -232,6 +232,6 @@ Build the destination path based on the source path. Essentially convert
 `src/some/path.coffee` to `Resources/some/path.js`.
 
     destPathFromSrcPath = (src_path) ->
-      src_path.replace(/(^|\/)src\/alloy\//, "$1alloy/")
+      src_path.replace(/(^|\/)src\/alloy\//, "$1app/")
         .replace(/(^|\/)src\//, "$1Resources/")
         .replace(/\.(lit)?coffee(\.md)?/, ".js")
