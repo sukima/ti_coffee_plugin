@@ -16,7 +16,7 @@ This project has been reborn from <a href="https://github.com/billdawson" class=
 This plugin will compile CoffeeScript files into JavaScript files using the following conventions:
 
 - Any CoffeeScript files in the `src/` directory will compile to JavaScript into the `Resources/` directory.
-- Any CoffeeScript files in the `src/alloy/` directory will compile to JavaScript into the `alloy/` directory.
+- Any CoffeeScript files in the `src/alloy/` directory will compile to JavaScript into the `app/` directory.
 - Any CoffeeScript files in the `app/` directory will compile to JavaScript into the `app/` directory.[^1]
 
 [^1]: This was to allow alloy only projects to keep source files coupled with their XML and TSS assets.
