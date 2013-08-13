@@ -17,9 +17,9 @@ This plugin will compile CoffeeScript files into JavaScript files using the foll
 
 - Any CoffeeScript files in the `src/` directory will compile to JavaScript into the `Resources/` directory.
 - Any CoffeeScript files in the `src/alloy/` directory will compile to JavaScript into the `alloy/` directory.
-- Any CoffeeScript files in the `app/` directory will compile to JavaScript into the `app/` directory.<sup>\*</sup>
+- Any CoffeeScript files in the `app/` directory will compile to JavaScript into the `app/` directory.[^1]
 
-<sup>\*</sup> This was to allow alloy only projects to keep source files coupled with their XML and TSS assets.
+[^1]: This was to allow alloy only projects to keep source files coupled with their XML and TSS assets.
 
 ### Installing
 
