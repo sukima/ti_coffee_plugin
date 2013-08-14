@@ -64,6 +64,19 @@ describe "TiCoffeePlugin", ->
         expect( paths ).toContain FS.cs_file
         expect( paths ).toContain alloy_file for alloy_file in FS.alloy_files
 
+    it "should allow missing source directories", ->
+      FS.tearDown() # inefficient I know, But I need a different fixture for this test
+      FS.addFile FS.cs_file, "cs_file"
+      flag = false
+      runs =>
+        @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
+        @ti_coffee_plugin.onReady(-> flag = true)
+      waitsFor (-> flag), "constructor", ASYNC_TIMEOUT
+      runs =>
+        paths = @ti_coffee_plugin.coffee_files.map (x) -> x.src_path
+        expect( paths ).toContain FS.cs_file
+        expect( paths ).not.toContain alloy_file for alloy_file in FS.alloy_files
+
     it "should still cycle onReady events when no CS files found", ->
       no_cs_files_cli = argv: { "project-dir": "__NO_CS_FILES_PROJECT_DIR_DOES_NOT_EXIST__" }
       flag = false

@@ -166,16 +166,17 @@ Search and find all CoffeeScript files
         lowerCountAndCallBack = -> cb?() unless --count > 0
         # TODO: Remove dependency on unix find tool.
         exec "find #{@src_dir} #{@alloy_dir}", (err, stdout) =>
-          if err
-            @logger.warn "[ti.coffee] Unable to find any CoffeeScript files in #{@src_dir} or #{@alloy_dir}"
-            return cb?()
+          @logger.warn "[ti.coffee] #{err}" if err
           file_paths = stdout.split("\n")
-          for file_path in file_paths
+          @coffee_files = for file_path in file_paths
             continue unless file_path.match /\.(lit)?coffee(\.md)?$/
             count++
             coffee_file = new TiCoffeePlugin.CoffeeFile(file_path)
             coffee_file.onReady lowerCountAndCallBack
-            @coffee_files.push(coffee_file)
+            coffee_file
+          unless @coffee_files.length > 0
+            @logger.warn "[ti.coffee] Unable to find any CoffeeScript files in #{@src_dir} or #{@alloy_dir}"
+            cb?()
 
 ## loadHashes ##
 
