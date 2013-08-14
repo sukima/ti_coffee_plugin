@@ -19,17 +19,13 @@ class exports.FS
 
   @exists: existsSync
 
-  @setup: =>
-    exec "mkdir -p #{@getPath 'src/test_cs_dir'}"
-    exec "touch #{@cs_file}"
-    exec "mkdir -p #{@getPath 'src/alloy/test_alloy_dir'}"
-    exec "mkdir -p #{@getPath 'app/test_alloy_dir2'}"
-    exec "touch #{@alloy_files[0]}"
-    exec "touch #{@alloy_files[1]}"
-
-  @tearDown: =>
-    exec "rm -rf #{@BASE_PATH}"
-
   @addFile: (file_path, data) =>
     exec "mkdir -p #{dirname(file_path)}"
     writeFileSync file_path, data
+
+  @setup: =>
+    @addFile @cs_file, "cs_file"
+    @addFile alloy_file, "cs_file" for alloy_file in @alloy_files
+
+  @tearDown: =>
+    exec "rm -rf #{@BASE_PATH}"
