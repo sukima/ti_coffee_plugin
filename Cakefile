@@ -1,4 +1,4 @@
-fs         = require "fs"
+fs         = require "fs.extra"
 path       = require "path"
 {run:exec} = require "execSync"
 util       = require "util"
@@ -50,8 +50,9 @@ task "dist", "Build a zip file for distribution", ->
     fs.linkSync "src/README.md", "#{build_dir}/README.md"
   code =  exec "coffee --bare --output '#{build_dir}' --compile src"
   unless code
-    util.log "Compiled plugin."
-    zip zipFile, "build"
+    fs.copy "node_modules/q/q.js", "#{build_dir}/hooks/q.js", ->
+      util.log "Compiled plugin."
+      zip zipFile, "build"
 
 task "deploy", "Ship the zip to file storage (signed)", ->
   invoke "dist"
