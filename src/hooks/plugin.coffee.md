@@ -3,6 +3,7 @@ Titanium CoffeeScript Compiler Plugin
 
 This is a plugin for the titanium CLI version 3.0.0 or greater.
 
+    Q            = require "q"
     fs           = require "fs"
     path         = require "path"
     {exec}       = require "child_process"
@@ -43,47 +44,38 @@ The hashes are used to skip compilation of files that have not changed.
         constructor: (@src_path) ->
           @dest_path = destPathFromSrcPath(@src_path)
           @dest_dir  = path.dirname(@dest_path)
-          @listeners = []
-          @createHash()
+          @waitingForReady = @findHash()
 
-### createHash ###
+### findHash ###
 
-A helper function to load the hash of a CS file. Because this is asynchronous
-we allow attaching callback via `onReady`.
+A helper function to load the hash of a CS file. Mostly used for stubbing in
+tests.
 
-        createHash: ->
-          registerMD5Hash @src_path, (@hash) =>
-            fn(@) for fn in @listeners if @listeners?
-            @listeners = null
-
-### onReady ###
-
-Add callbacks to the stack to be executed when the hash is complete.
-
-        onReady: (callback) ->
-          return callback(@) unless @listeners?
-          @listeners.push callback
+        findHash: ->
+          (findMD5FromSrc @src_path).then (@hash) =>
 
 ### Compile individual CoffeeFile ###
 
-        compile: (logger, cb) ->
+        compile: (logger) ->
           logger.info "[ti.coffee] Compiling: #{@src_path}"
           command = process.env["COFFEE_PATH"] || "coffee"
           command += " --bare --compile --output #{@dest_dir} #{@src_path}"
           logger.debug "[ti.coffee] Executing: #{command}"
-          exec command, cb
+          Q.nfcall(exec, command)
 
 ### Clean individual CoffeeFile ###
 
 We want to remove the generated JS file as well as any directories in the tree
 that become empty after the JS file is removed.
 
-        clean: (logger, cb) ->
+        clean: (logger) ->
           logger.info "[ti.coffee] Removing generated file: #{@dest_path}"
-          rmdir = (dir, cb) ->
+          defer = Q.defer()
+          rmdir = (dir) ->
             dir = path.dirname(dir)
-            fs.rmdir dir, (err) -> unless err then rmdir(dir, cb) else cb?()
-          fs.unlink @dest_path, => rmdir(@dest_path, cb)
+            fs.rmdir dir, (err) -> unless err then rmdir(dir) else defer.resolve()
+          fs.unlink @dest_path, => rmdir(@dest_path)
+          defer.promise
 
 ## Constructor ##
 
@@ -100,10 +92,7 @@ call back chain access at any level and controlled through binding.
         @alloy_dir      = path.join @project_dir, "app"
         @hash_file_path = path.join @build_dir, TiCoffeePlugin.HASH_FILE
         @loadHashes()
-        @waitingForFindCoffeeFiles = true
-        @findCoffeeFiles =>
-          @waitingForFindCoffeeFiles = false
-          @finishReady()
+        @waitingForReady = @findCoffeeFiles()
 
 ## Hooks ##
 
@@ -111,74 +100,58 @@ call back chain access at any level and controlled through binding.
 
 This is the main hook used to perform the compilation.
 
-      compile: (build, finish) => @onReady =>
-        waitingForCompiled = 0
-        lowerWaitingForCompiledAndFinish = (err) =>
-          @logger.error err if err
-          finish() unless --waitingForCompiled > 0
-        for coffee_file in @coffee_files
-          if not fs.existsSync(coffee_file.dest_path) or @hashes[coffee_file.src_path] isnt coffee_file.hash
-            waitingForCompiled++
-            coffee_file.compile(@logger, lowerWaitingForCompiledAndFinish)
-          else
-            @logger.debug "[ti.coffee] Skipping (not changed): #{coffee_file.src_path}"
-        @updateHashes()
-        @storeHashes()
-        return
+      compile: (build, finish) =>
+        @waitingForReady.then =>
+          promises = []
+          for coffee_file in @coffee_files
+            if not fs.existsSync(coffee_file.dest_path) or @hashes[coffee_file.src_path] isnt coffee_file.hash
+              promises.push coffee_file.compile(@logger)
+            else
+              @logger.debug "[ti.coffee] Skipping (not changed): #{coffee_file.src_path}"
+          Q.allSettled(promises).fin(finish).then =>
+            @updateHashes()
+            @storeHashes()
 
 ### clean ###
 
 Used to clean up generated JS files in `Resources` directory.
 
-      clean: (build, finish, cb) => @onReady =>
-        coffee_file.clean(@logger) for coffee_file in @coffee_files
-        fs.unlink @hash_file_path, -> cb?()
-        finish()
-        return
+      clean: (build, finish) =>
+        @waitingForReady.then =>
+          promises = []
+          promises.push coffee_file.clean(@logger) for coffee_file in @coffee_files
+          promises.push Q.nfcall(fs.unlink, @hash_file_path)
+          Q.allSettled(promises).fin finish
 
 ## Helper Functions ##
 
-### onReady ###
-
-Add callbacks to the stack to be executed when the hash is complete.
-
-      onReady: (callback) ->
-        return callback(@) unless @waitingForFindCoffeeFiles
-        @listeners ?= []
-        @listeners.push callback
-
-### finishReady ###
-
-Used as a callback to monitor when this object is ready.
-
-      finishReady: ->
-        return false if @waitingForFindCoffeeFiles
-        cb(@) for cb in @listeners if @listeners?
-        @listeners = null
-
-## findCoffeeFiles ##
+### findCoffeeFiles ###
 
 Search and find all CoffeeScript files
 
-      findCoffeeFiles: (cb) ->
-        @coffee_files = []
-        count = 0
-        lowerCountAndCallBack = -> cb?() unless --count > 0
+      findCoffeeFiles: ->
         # TODO: Remove dependency on unix find tool.
-        exec "find #{@src_dir} #{@alloy_dir}", (err, stdout) =>
-          @logger.warn "[ti.coffee] #{err}" if err
-          file_paths = stdout.split("\n")
-          @coffee_files = for file_path in file_paths
-            continue unless file_path.match /\.(lit)?coffee(\.md)?$/
-            count++
-            coffee_file = new TiCoffeePlugin.CoffeeFile(file_path)
-            coffee_file.onReady lowerCountAndCallBack
-            coffee_file
+        waitingForCoffeeFileInstances = Q.allSettled([
+          Q.nfcall(exec, "find #{@src_dir}")
+          Q.nfcall(exec, "find #{@alloy_dir}")
+        ]).then (results) =>
+          coffee_files = []
+          for result in results
+            if result.state is "rejected"
+              @logger.debug "[ti.coffee] #{result.reason}"
+            else
+              # result.value => [ stdin, stderr ]
+              file_paths = result.value[0].split("\n")
+              for file_path in file_paths
+                continue unless file_path.match /\.(lit)?coffee(\.md)?$/
+                coffee_files.push new TiCoffeePlugin.CoffeeFile(file_path)
+          coffee_files
+        waitingForCoffeeFileInstances.then (@coffee_files) =>
           unless @coffee_files.length > 0
             @logger.warn "[ti.coffee] Unable to find any CoffeeScript files in #{@src_dir} or #{@alloy_dir}"
-            cb?()
+          @coffee_files
 
-## loadHashes ##
+### loadHashes ###
 
 Read the hash file.
 
@@ -186,7 +159,7 @@ Read the hash file.
         return @hashes = {} unless fs.existsSync(@hash_file_path)
         @hashes = require(path.resolve(@hash_file_path))
 
-## updateHashes ##
+### updateHashes ###
 
 Update the `hashes` based on the loaded `coffee_files`.
 
@@ -196,36 +169,34 @@ Update the `hashes` based on the loaded `coffee_files`.
           @hashes[coffee_file.src_path] = coffee_file.hash
         @hashes
 
-## storeHahses ##
+### storeHahses ###
 
 Build the hash file into `build/coffee_file_hashes.json`
 
-      storeHashes: (cb) ->
+      storeHashes: ->
         writeFile = =>
-          fs.writeFile @hash_file_path, JSON.stringify(@hashes), (err) =>
-            @logger.error err if err
-            cb?(err)
-        fs.exists path.dirname(@hash_file_path), (exists) =>
-          if exists
-            writeFile()
-          else
-            fs.mkdir path.dirname(@hash_file_path), (err) =>
-              if err
-                @logger.error err
-                cb?(err)
-              else
-                writeFile()
+          Q.nfcall(fs.writeFile, @hash_file_path, JSON.stringify(@hashes))
+        if fs.existsSync path.dirname(@hash_file_path)
+          waitingForWriteFile = writeFile()
+        else
+          waitingForWriteFile = Q.nfcall(fs.mkdir, path.dirname(@hash_file_path))
+            .then(writeFile)
+        waitingForWriteFile.fail (err) => @logger.error err
 
-### registerMD5Hash (private) ##
+### findMD5FromSrc (private) ##
 
 Create an MD5 hash from a file then pass it to a callback.
 
-    registerMD5Hash = (file, callback) ->
-      return callback("") unless fs.existsSync(file)
-      md5sum = createHash("md5")
-      f = fs.ReadStream(file)
-      f.on "data", (data) -> md5sum.update(data)
-      f.on "end", -> callback md5sum.digest("hex")
+    findMD5FromSrc = (file) ->
+      defer = Q.defer()
+      unless fs.existsSync(file)
+        defer.resolve("")
+      else
+        md5sum = createHash("md5")
+        f = fs.ReadStream(file)
+        f.on "data", (data) -> md5sum.update(data)
+        f.on "end", -> defer.resolve md5sum.digest("hex")
+      defer.promise
 
 ### destPathFromSrcPath (private) ###
 

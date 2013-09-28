@@ -1,17 +1,18 @@
 describe "CoffeeFile", ->
+  Q            = require "q"
   path         = require "path"
   {CoffeeFile} = require "../src/hooks/plugin"
 
+  beforeEach -> FS.setup()
+
+  afterEach -> FS.tearDown()
+
   describe "#constructor", ->
-
-    beforeEach -> FS.setup()
-
-    afterEach -> FS.tearDown()
 
     describe "path converting", ->
 
       beforeEach ->
-        spyOn CoffeeFile::, "createHash"
+        spyOn CoffeeFile::, "findHash"
 
       it "should convert CoffeeScript extention to JavaScript extention", ->
         expect( new CoffeeFile("src/test.coffee").dest_path ).toMatch /\.js$/
@@ -53,52 +54,55 @@ describe "CoffeeFile", ->
           expect( new CoffeeFile("prefix/test/test.coffee").dest_dir ).toBe "prefix/test"
 
     it "should assign a hash", ->
-      flag = false
-      coffee_file = new CoffeeFile(FS.cs_file)
-      runs => coffee_file.onReady -> flag = true
-      waitsFor (-> flag), "onReady", ASYNC_TIMEOUT
-      runs =>
-        expect( coffee_file.hash ).toEqual jasmine.any(String)
-        expect( coffee_file.hash.length ).not.toBe 0
+      ready = false
+      runs ->
+        @coffee_file = new CoffeeFile(FS.cs_file)
+        @coffee_file.waitingForReady.fin(-> ready = true).done()
+      waitsFor (-> ready), "waitingForReady promise to resolve", ASYNC_TIMEOUT
+      runs ->
+        expect( @coffee_file.hash ).toEqual jasmine.any(String)
+        expect( @coffee_file.hash.length ).not.toBe 0
 
   describe "file system methods", ->
 
     beforeEach ->
-      FS.setup()
       @coffee_file = new CoffeeFile(FS.cs_file)
       @temp_file = FS.getPath("__test_coffee_path__")
 
-    afterEach ->
-      FS.tearDown()
-
     describe "#compile", ->
+
+      it "should return a promise", ->
+        expect( @coffee_file.compile new MockLogger ).toBeAPromise()
 
       it "should create 'Resource' sub-trees", ->
         flag = false
-        runs => @coffee_file.compile new MockLogger, -> flag = true
+        runs -> Q(@coffee_file.compile new MockLogger).fin(-> flag = true).done()
         waitsFor (-> flag), "compile()", ASYNC_TIMEOUT
-        runs => expect( FS.exists(@coffee_file.dest_path) ).toBeTruthy()
+        runs -> expect( FS.exists(@coffee_file.dest_path) ).toBeTruthy()
 
       it "should allow environmental override for coffee command", ->
         flag = false
         process.env["COFFEE_PATH"] = "touch #{@temp_file} #"
-        runs => @coffee_file.compile new MockLogger, -> flag = true
+        runs -> Q(@coffee_file.compile new MockLogger).fin(-> flag = true).done()
         waitsFor (-> flag), "compile()", ASYNC_TIMEOUT
-        runs => expect( FS.exists(@temp_file) ).toBeTruthy()
+        runs -> expect( FS.exists(@temp_file) ).toBeTruthy()
 
     describe "#clean", ->
 
       beforeEach ->
         FS.addFile @coffee_file.dest_path
 
+      it "should return a promise", ->
+        expect( @coffee_file.clean new MockLogger ).toBeAPromise()
+
       it "should clean up generated js files", ->
         flag = false
-        runs => @coffee_file.clean new MockLogger, -> flag = true
+        runs -> Q(@coffee_file.clean new MockLogger).fin(-> flag = true).done()
         waitsFor (-> flag), "clean()", ASYNC_TIMEOUT
-        runs => expect( FS.exists(@coffee_file.dest_path) ).toBeFalsy()
+        runs -> expect( FS.exists(@coffee_file.dest_path) ).toBeFalsy()
 
       it "should remove directory if empty", ->
         flag = false
-        runs => @coffee_file.clean new MockLogger, -> flag = true
+        runs -> Q(@coffee_file.clean new MockLogger).fin(-> flag = true).done()
         waitsFor (-> flag), "clean()", ASYNC_TIMEOUT
-        runs => expect( FS.exists(path.dirname(@coffee_file.dest_path)) ).toBeFalsy()
+        runs -> expect( FS.exists(path.dirname(@coffee_file.dest_path)) ).toBeFalsy()
