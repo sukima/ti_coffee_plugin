@@ -9,7 +9,6 @@ config        = require "./package.json"
 exec   = Q.denodeify child_process.exec
 copy   = Q.denodeify fs.copy
 link   = Q.denodeify fs.link
-mkdir  = Q.denodeify fs.mkdir
 exists = fs.existsSync
 
 ssh_server = "tritarget.org:tritarget.org/files/"
