@@ -123,6 +123,16 @@ describe "TiCoffeePlugin", ->
           @promise.done()
           expect( @coffee_file.compile ).toHaveBeenCalled()
 
+      it "should call finish()", ->
+        ready = false
+        runs ->
+          @promise = @ti_coffee_plugin.compile({}, @callback_spy)
+            .fin(-> ready = true)
+        waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
+        runs ->
+          @promise.done()
+          expect( @callback_spy ).toHaveBeenCalledWith()
+
       it "should save a hash file", ->
         ready = false
         runs ->
@@ -177,7 +187,7 @@ describe "TiCoffeePlugin", ->
         waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
         runs ->
           @promise.done()
-          expect( @callback_spy ).toHaveBeenCalled()
+          expect( @callback_spy ).toHaveBeenCalledWith()
 
       it "should call CoffeeFile.clean()", ->
         ready = false
