@@ -111,7 +111,7 @@ This is the main hook used to perform the compilation.
           Q.allSettled(promises).then =>
             @updateHashes()
             @storeHashes()
-        @waitingForReady .then(finish)
+        @waitingForReady.then(finish)
           .fail (reason) ->
             console.error "[TiCoffeePlugin] Error: #{reason}"
             process.exit -1
