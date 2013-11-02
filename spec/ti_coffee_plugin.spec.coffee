@@ -58,12 +58,11 @@ describe "TiCoffeePlugin", ->
       flag = false
       runs =>
         @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
-        @ti_coffee_plugin.waitingForReady
-          .fail(-> expect(false).toBeTruthy())
+        @promise = @ti_coffee_plugin.waitingForReady
           .fin(-> flag = true)
-          .done()
       waitsFor (-> flag), "waitingForReady promise to resolve", ASYNC_TIMEOUT
       runs =>
+        @promise.done()
         paths = @ti_coffee_plugin.coffee_files.map (x) -> x.src_path
         expect( paths ).toContain FS.cs_file
         expect( paths ).toContain alloy_file for alloy_file in FS.alloy_files
@@ -74,12 +73,11 @@ describe "TiCoffeePlugin", ->
       flag = false
       runs =>
         @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, @cli, {})
-        @ti_coffee_plugin.waitingForReady
-          .fail(-> expect(false).toBeTruthy())
+        @promise = @ti_coffee_plugin.waitingForReady
           .fin(-> flag = true)
-          .done()
       waitsFor (-> flag), "constructor", ASYNC_TIMEOUT
       runs =>
+        @promise.done()
         paths = @ti_coffee_plugin.coffee_files.map (x) -> x.src_path
         expect( paths ).toContain FS.cs_file
         expect( paths ).not.toContain alloy_file for alloy_file in FS.alloy_files
@@ -89,12 +87,11 @@ describe "TiCoffeePlugin", ->
       flag = false
       runs =>
         @ti_coffee_plugin = new TiCoffeePlugin(new MockLogger, {}, no_cs_files_cli, {})
-        @ti_coffee_plugin.waitingForReady
-          .fail(-> expect(false).toBeTruthy())
+        @promise = @ti_coffee_plugin.waitingForReady
           .fin(-> flag = true)
-          .done()
       waitsFor (-> flag), "constructor", ASYNC_TIMEOUT
       runs =>
+        @promise.done()
         expect( @ti_coffee_plugin.coffee_files.length ).toBe 0
 
   describe "hooks", ->
@@ -119,22 +116,22 @@ describe "TiCoffeePlugin", ->
       it "should call CoffeeFile.compile()", ->
         ready = false
         runs ->
-          @ti_coffee_plugin.compile({}, @callback_spy)
-            .fail(-> expect(false).toBeTruthy())
+          @promise = @ti_coffee_plugin.compile({}, @callback_spy)
             .fin(-> ready = true)
-            .done()
         waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
-        runs -> expect( @coffee_file.compile ).toHaveBeenCalled()
+        runs ->
+          @promise.done()
+          expect( @coffee_file.compile ).toHaveBeenCalled()
 
       it "should save a hash file", ->
         ready = false
         runs ->
-          @ti_coffee_plugin.compile({}, @callback_spy)
-            .fail(-> expect(false).toBeTruthy())
+          @promise = @ti_coffee_plugin.compile({}, @callback_spy)
             .fin(-> ready = true)
-            .done()
         waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
-        runs -> expect( @ti_coffee_plugin.storeHashes ).toHaveBeenCalled()
+        runs ->
+          @promise.done()
+          expect( @ti_coffee_plugin.storeHashes ).toHaveBeenCalled()
 
       describe "(hash logic)", ->
 
@@ -150,22 +147,22 @@ describe "TiCoffeePlugin", ->
           FS.addFile @coffee_file.dest_path
           ready = false
           runs ->
-            @ti_coffee_plugin.compile({}, @callback_spy)
-              .fail(-> expect(false).toBeTruthy())
+            @promise = @ti_coffee_plugin.compile({}, @callback_spy)
               .fin(-> ready = true)
-              .done()
           waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
-          runs -> expect( @coffee_file.compile ).not.toHaveBeenCalled()
+          runs ->
+            @promise.done()
+            expect( @coffee_file.compile ).not.toHaveBeenCalled()
 
         it "should compile when hashes match and JS file missing", ->
           ready = false
           runs ->
-            @ti_coffee_plugin.compile({}, @callback_spy)
-              .fail(-> expect(false).toBeTruthy())
+            @promise = @ti_coffee_plugin.compile({}, @callback_spy)
               .fin(-> ready = true)
-              .done()
           waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
-          runs -> expect( @coffee_file.compile ).toHaveBeenCalled()
+          runs ->
+            @promise.done()
+            expect( @coffee_file.compile ).toHaveBeenCalled()
 
     describe "#clean", ->
 
@@ -175,34 +172,34 @@ describe "TiCoffeePlugin", ->
       it "should call finish()", ->
         ready = false
         runs ->
-          @ti_coffee_plugin.clean({}, @callback_spy)
-            .fail(-> expect(false).toBeTruthy())
+          @promise = @ti_coffee_plugin.clean({}, @callback_spy)
             .fin(-> ready = true)
-            .done()
         waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
-        runs -> expect( @callback_spy ).toHaveBeenCalled()
+        runs ->
+          @promise.done()
+          expect( @callback_spy ).toHaveBeenCalled()
 
       it "should call CoffeeFile.clean()", ->
         ready = false
         runs ->
-          @ti_coffee_plugin.clean({}, @callback_spy)
-            .fail(-> expect(false).toBeTruthy())
+          @promise = @ti_coffee_plugin.clean({}, @callback_spy)
             .fin(-> ready = true)
-            .done()
         waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
-        runs -> expect( @coffee_file.clean ).toHaveBeenCalled()
+        runs ->
+          @promise.done()
+          expect( @coffee_file.clean ).toHaveBeenCalled()
 
       it "should remove hash file", ->
         ready = false
         test_file = @ti_coffee_plugin.hash_file_path
         FS.addFile test_file, "{}"
-        runs =>
-          @ti_coffee_plugin.clean({}, @callback_spy)
-            .fail(-> expect(false).toBeTruthy())
+        runs ->
+          @promise = @ti_coffee_plugin.clean({}, @callback_spy)
             .fin(-> ready = true)
-            .done()
         waitsFor (-> ready), "promise to be resolved", ASYNC_TIMEOUT
-        runs => expect( FS.exists(test_file) ).toBeFalsy()
+        runs ->
+          @promise.done()
+          expect( FS.exists(test_file) ).toBeFalsy()
 
   describe "helper methods", ->
 
@@ -215,13 +212,12 @@ describe "TiCoffeePlugin", ->
       it "should load the hashes from a JSON file", ->
         ready = false
         runs ->
-          @ti_coffee_plugin.waitingForReady
-            .fail(-> expect(false).toBeTruthy())
+          @promise = @ti_coffee_plugin.waitingForReady
             .fin(-> ready = true)
-            .done()
           FS.addFile @ti_coffee_plugin.hash_file_path, TEST_HASH_FILE_DATA
         waitsFor (-> ready), "waitingForReady to resolve", ASYNC_TIMEOUT
         runs ->
+          @promise.done()
           @ti_coffee_plugin.loadHashes()
           expect( @ti_coffee_plugin.hashes ).toEqual TEST_HASH_DATA
 
@@ -237,10 +233,10 @@ describe "TiCoffeePlugin", ->
             @ti_coffee_plugin.hashes = TEST_HASH_DATA
             @ti_coffee_plugin.coffee_files = [ @coffee_file ]
             @promise = @ti_coffee_plugin.storeHashes()
-            @promise.fail(-> expect(false).toBeTruthy())
-            @promise.fin(-> ready = true).done()
+              .fin(-> ready = true)
           @ti_coffee_plugin.waitingForReady.done()
           expect( FS.exists(@ti_coffee_plugin.hash_file_path) ).toBeFalsy()
         waitsFor (-> ready), "waitingForReady and storeHashes promises to resolve", ASYNC_TIMEOUT
         runs =>
+          @promise.done()
           expect( FS.exists(@ti_coffee_plugin.hash_file_path) ).toBeTruthy()

@@ -57,11 +57,11 @@ describe "CoffeeFile", ->
       ready = false
       runs ->
         @coffee_file = new CoffeeFile(FS.cs_file)
-        @coffee_file.waitingForReady
-          .fail(-> expect(false).toBeTruthy())
-          .fin(-> ready = true).done()
+        @promise = @coffee_file.waitingForReady
+        @promise.fin(-> ready = true)
       waitsFor (-> ready), "waitingForReady promise to resolve", ASYNC_TIMEOUT
       runs ->
+        @promise.done()
         expect( @coffee_file.hash ).toEqual jasmine.any(String)
         expect( @coffee_file.hash.length ).not.toBe 0
 
@@ -79,21 +79,23 @@ describe "CoffeeFile", ->
       it "should create 'Resource' sub-trees", ->
         flag = false
         runs ->
-          Q(@coffee_file.compile new MockLogger)
-            .fail(-> expect(false).toBeTruthy())
-            .fin(-> flag = true).done()
+          @promise = Q(@coffee_file.compile new MockLogger)
+            .fin(-> flag = true)
         waitsFor (-> flag), "compile()", ASYNC_TIMEOUT
-        runs -> expect( FS.exists(@coffee_file.dest_path) ).toBeTruthy()
+        runs ->
+          @promise.done()
+          expect( FS.exists(@coffee_file.dest_path) ).toBeTruthy()
 
       it "should allow environmental override for coffee command", ->
         flag = false
         process.env["COFFEE_PATH"] = "touch #{@temp_file} #"
         runs ->
-          Q(@coffee_file.compile new MockLogger)
-            .fail(-> expect(false).toBeTruthy())
-            .fin(-> flag = true).done()
+          @promise = Q(@coffee_file.compile new MockLogger)
+            .fin(-> flag = true)
         waitsFor (-> flag), "compile()", ASYNC_TIMEOUT
-        runs -> expect( FS.exists(@temp_file) ).toBeTruthy()
+        runs ->
+          @promise.done()
+          expect( FS.exists(@temp_file) ).toBeTruthy()
 
     describe "#clean", ->
 
@@ -106,17 +108,19 @@ describe "CoffeeFile", ->
       it "should clean up generated js files", ->
         flag = false
         runs ->
-          Q(@coffee_file.clean new MockLogger)
-            .fail(-> expect(false).toBeTruthy())
-            .fin(-> flag = true).done()
+          @promise = Q(@coffee_file.clean new MockLogger)
+            .fin(-> flag = true)
         waitsFor (-> flag), "clean()", ASYNC_TIMEOUT
-        runs -> expect( FS.exists(@coffee_file.dest_path) ).toBeFalsy()
+        runs ->
+          @promise.done()
+          expect( FS.exists(@coffee_file.dest_path) ).toBeFalsy()
 
       it "should remove directory if empty", ->
         flag = false
         runs ->
-          Q(@coffee_file.clean new MockLogger)
-            .fail(-> expect(false).toBeTruthy())
-            .fin(-> flag = true).done()
+          @promise = Q(@coffee_file.clean new MockLogger)
+            .fin(-> flag = true)
         waitsFor (-> flag), "clean()", ASYNC_TIMEOUT
-        runs -> expect( FS.exists(path.dirname(@coffee_file.dest_path)) ).toBeFalsy()
+        runs ->
+          @promise.done()
+          expect( FS.exists(path.dirname(@coffee_file.dest_path)) ).toBeFalsy()
