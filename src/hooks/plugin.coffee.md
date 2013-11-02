@@ -108,9 +108,15 @@ This is the main hook used to perform the compilation.
               promises.push coffee_file.compile(@logger)
             else
               @logger.debug "[ti.coffee] Skipping (not changed): #{coffee_file.src_path}"
-          Q.allSettled(promises).fin(finish).then =>
+          Q.allSettled(promises).then =>
             @updateHashes()
             @storeHashes()
+        @waitingForReady .then(finish)
+          .fail (reason) ->
+            console.error "[TiCoffeePlugin] Error: #{reason}"
+            process.exit -1
+          .done()
+        @waitingForReady
 
 ### clean ###
 
@@ -121,7 +127,13 @@ Used to clean up generated JS files in `Resources` directory.
           promises = []
           promises.push coffee_file.clean(@logger) for coffee_file in @coffee_files
           promises.push Q.nfcall(fs.unlink, @hash_file_path)
-          Q.allSettled(promises).fin finish
+          Q.allSettled(promises)
+        @waitingForReady.then(finish)
+          .fail (reason) ->
+            console.error "[TiCoffeePlugin] Error: #{reason}"
+            process.exit -1
+          .done()
+        @waitingForReady
 
 ## Helper Functions ##
 
