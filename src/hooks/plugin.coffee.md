@@ -111,12 +111,11 @@ This is the main hook used to perform the compilation.
           Q.allSettled(promises).then =>
             @updateHashes()
             @storeHashes()
-        @waitingForReady.then(-> finish())
-          .fail (reason) ->
-            console.error "[TiCoffeePlugin] Error: #{reason}"
-            process.exit -1
-          .done()
-        @waitingForReady
+        .then ->
+          finish()
+        .fail (reason) ->
+          console.error "[TiCoffeePlugin] Error: #{reason}"
+          process.exit -1
 
 ### clean ###
 
@@ -128,12 +127,11 @@ Used to clean up generated JS files in `Resources` directory.
           promises.push coffee_file.clean(@logger) for coffee_file in @coffee_files
           promises.push Q.nfcall(fs.unlink, @hash_file_path)
           Q.allSettled(promises)
-        @waitingForReady.then(-> finish())
-          .fail (reason) ->
-            console.error "[TiCoffeePlugin] Error: #{reason}"
-            process.exit -1
-          .done()
-        @waitingForReady
+        .then ->
+          finish()
+        .fail (reason) ->
+          console.error "[TiCoffeePlugin] Error: #{reason}"
+          process.exit -1
 
 ## Helper Functions ##
 
