@@ -14,7 +14,7 @@ This is a plugin for the titanium CLI version 3.0.0 or greater.
 ## Configuration (static) ##
 
       @name:       "ti.coffee"
-      @version:    "2.2.1"
+      @version:    "2.2.2"
       @cliVersion: ">=3.X" # What verion this plugin works with
       @HASH_FILE:  "coffee_file_hashes.json"
 
