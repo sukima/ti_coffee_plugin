@@ -3,5 +3,5 @@ destination: ./_site
 layouts:     ./_layouts
 
 # Site Variables
-version:       2.2.1
+version:       2.2.2
 short_version: 2.2
