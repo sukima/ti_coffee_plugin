@@ -10,7 +10,6 @@
     "q": "~0.9.7"
   },
   "devDependencies": {
-    "execSync": "~> 1.0.x",
     "coffee-script": "~> 1.6.3",
     "jasmine-node": "~> 1.2.0",
     "fs.extra": "~1.2.1"

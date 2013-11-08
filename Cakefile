@@ -1,7 +1,6 @@
 fs            = require "fs.extra"
 child_process = require "child_process"
 path          = require "path"
-{run:exec}    = require "execSync"
 util          = require "util"
 Q             = require "q"
 config        = require "./package.json"
@@ -64,7 +63,7 @@ test = ->
 buildDeepPath = (path) ->
   for hook_path in path.split("/")
     deep_path = if deep_path? then "#{deep_path}/#{hook_path}" else hook_path
-    fs.mkdirSync deep_path unless fs.existsSync deep_path
+    fs.mkdirSync deep_path unless exists deep_path
   Q.resolve path
 
 tryToLink = (src, dest) ->
