@@ -39,7 +39,7 @@ finished = -> process.exit 0
 
 try
   ti_coffee_plugin = new TiCoffeePlugin(logger, {}, cli, {})
-  ti_coffee_plugin.onReady ->
+  ti_coffee_plugin.waitingForReady.then ->
     if clean
       ti_coffee_plugin.clean {}, (->), finished
     else
