@@ -1,5 +1,6 @@
 *.pyc
 *.swp
-build
-tests
-node_modules
+build/
+tests/
+node_modules/
+src/q.js

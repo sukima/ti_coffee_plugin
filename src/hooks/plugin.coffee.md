@@ -3,7 +3,7 @@ Titanium CoffeeScript Compiler Plugin
 
 This is a plugin for the titanium CLI version 3.0.0 or greater.
 
-    Q            = require "q"
+    Q            = require "../q"
     fs           = require "fs"
     path         = require "path"
     {exec}       = require "child_process"

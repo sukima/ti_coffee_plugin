@@ -56,8 +56,11 @@ clean = ->
 
 test = ->
   spawn = Q.denodeify child_process.spawn
-  waitingForTests = spawn "jasmine-node", [ "--coffee", "--color", "spec/" ], stdio: "inherit"
-  waitingForTests.fail (reason) -> util.log "[ERROR] #{reason}"
+  waitingForTests = tryToLink("node_modules/q/q.js", "src/q.js")
+    .then ->
+      spawn "jasmine-node", [ "--coffee", "--color", "spec/" ], stdio: "inherit"
+    .fail (reason) ->
+      util.log "[ERROR] #{reason}"
   waitingForTests
 
 buildDeepPath = (path) ->
@@ -80,7 +83,7 @@ dist = ->
     .then(-> tryToLink "plugin.py", "#{build_dir}/plugin.py")
     .then(-> tryToLink "src/README.md", "#{build_dir}/README.md")
     .then(-> exec "coffee --bare --output '#{build_dir}' --compile src")
-    .then(-> copy "node_modules/q/q.js", "#{build_dir}/hooks/q.js")
+    .then(-> copy "node_modules/q/q.js", "#{build_dir}/q.js")
     .then(-> zip zipFile, "build")
     .then(-> util.log "Build complete")
 
