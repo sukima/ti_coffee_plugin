@@ -15,10 +15,15 @@ ssh_server = "tritarget.org:tritarget.org/files/"
 significant_version = config.version.replace /(\d+\.\d+)\.\d+/, "$1"
 zipFile = "#{config.name}-#{significant_version}.zip"
 
-task "clean",  "Removes the build directory",           -> clean().done()
-task "test",   "Run specs",                             -> test().done()
-task "dist",   "Build a zip file for distribution",     -> dist().done()
-task "deploy", "Ship the zip to file storage (signed)", -> deploy().done()
+task "clean",  "Removes the build directory",           -> clean().fail(bomb)
+task "test",   "Run specs",                             -> test().fail(bomb)
+task "dist",   "Build a zip file for distribution",     -> dist().fail(bomb)
+task "deploy", "Ship the zip to file storage (signed)", -> deploy().fail(bomb)
+
+bomb = (err) ->
+  isCode = typeof err is "number"
+  util.log "[ERROR] #{err}" unless isCode
+  process.exit(if isCode then err else 1)
 
 zip = (file, dir) ->
   waitingForZip = exec "cd '#{dir}' && zip -r -b /tmp '#{file}' . && chmod 644 '#{file}'"
