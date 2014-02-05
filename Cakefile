@@ -60,13 +60,19 @@ clean = ->
   waitingForClean
 
 test = ->
-  spawn = Q.denodeify child_process.spawn
-  waitingForTests = tryToLink("node_modules/q/q.js", "src/q.js")
-    .then ->
-      spawn "mocha", [ "--compilers", "coffee:coffee-script", "-R", "spec" ], stdio: "inherit"
-    .fail (reason) ->
-      util.log "[ERROR] #{reason}"
-  waitingForTests
+  tryToLink("node_modules/q/q.js", "src/q.js").then ->
+    waitForSpawn = Q.defer()
+    proc = child_process.spawn "mocha", [
+      "--compilers", "coffee:coffee-script",
+      "-R", "spec"
+    ], stdio: "inherit"
+    proc.on "error", waitForSpawn.reject
+    proc.on "exit", (code) ->
+      if code == 0
+        waitForSpawn.resolve(code)
+      else
+        waitForSpawn.reject(code)
+    waitForSpawn.promise
 
 buildDeepPath = (path) ->
   for hook_path in path.split("/")
