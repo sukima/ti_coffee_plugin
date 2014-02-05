@@ -1,7 +1,8 @@
+{writeFileSync,existsSync} = require "fs"
+{dirname,basename}         = require "path"
+{run:exec}                 = require "execSync"
+
 class FileSystemHelper
-  {writeFileSync,existsSync} = require "fs"
-  {dirname,basename}         = require "path"
-  {run:exec}                 = require "execSync"
 
   @BASE_PATH:      "tests"
   @getPath:        (path) => "#{@BASE_PATH}/#{path}"

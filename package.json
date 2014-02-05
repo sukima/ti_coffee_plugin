@@ -14,7 +14,8 @@
     "fs.extra": "~1.2.1",
     "mocha": "~1.17.1",
     "chai": "~1.9.0",
-    "sinon": "~1.8.1"
+    "sinon": "~1.8.1",
+    "execSync": "~1.0.1-pre"
   },
   "repository": {
     "type": "git",
