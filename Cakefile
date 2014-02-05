@@ -58,7 +58,7 @@ test = ->
   spawn = Q.denodeify child_process.spawn
   waitingForTests = tryToLink("node_modules/q/q.js", "src/q.js")
     .then ->
-      spawn "jasmine-node", [ "--coffee", "--color", "spec/" ], stdio: "inherit"
+      spawn "mocha", [ "--compilers", "coffee:coffee-script", "-R", "spec" ], stdio: "inherit"
     .fail (reason) ->
       util.log "[ERROR] #{reason}"
   waitingForTests
