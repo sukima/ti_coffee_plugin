@@ -65,13 +65,11 @@ describe "CoffeeFile", ->
     it "should assign a hash", (done) ->
       @coffee_file = new CoffeeFile(FS.cs_file)
       @promise = @coffee_file.waitingForReady
-      @promise.done =>
-        try
-          expect( @coffee_file.hash ).to.be.a "string"
-          expect( @coffee_file.hash.length ).to.not.equal 0
-          done()
-        catch err
-          done err
+      @promise.then =>
+        expect( @coffee_file.hash ).to.be.a "string"
+        expect( @coffee_file.hash.length ).to.not.equal 0
+        done()
+      .fail(done)
 
   describe "file system methods", ->
 
@@ -83,22 +81,18 @@ describe "CoffeeFile", ->
 
       it "should create 'Resource' sub-trees", (done) ->
         @promise = Q @coffee_file.compile(new MockLogger)
-        @promise.done =>
-          try
-            expect( FS.exists(@coffee_file.dest_path) ).to.be.true
-            done()
-          catch err
-            done err
+        @promise.then =>
+          expect( FS.exists(@coffee_file.dest_path) ).to.be.true
+          done()
+        .fail(done)
 
-      it "should allow environmental override for coffee command", ->
+      it "should allow environmental override for coffee command", (done) ->
         process.env["COFFEE_PATH"] = "touch #{@temp_file} #"
         @promise = Q @coffee_file.compile(new MockLogger)
-        @promise.done =>
-          try
-            expect( FS.exists(@temp_file) ).to.be.true
-            done()
-          catch err
-            done err
+        @promise.then =>
+          expect( FS.exists(@temp_file) ).to.be.true
+          done()
+        .fail(done)
 
     describe "#clean", ->
 
@@ -107,18 +101,14 @@ describe "CoffeeFile", ->
 
       it "should clean up generated js files", (done) ->
         @promise = Q @coffee_file.clean(new MockLogger)
-        @promise.done =>
-          try
-            expect( FS.exists(@coffee_file.dest_path) ).to.be.false
-            done()
-          catch err
-            done err
+        @promise.then =>
+          expect( FS.exists(@coffee_file.dest_path) ).to.be.false
+          done()
+        .fail(done)
 
       it "should remove directory if empty", (done) ->
         @promise = Q @coffee_file.clean(new MockLogger)
-        @promise.done =>
-          try
-            expect( FS.exists(path.dirname(@coffee_file.dest_path)) ).to.be.false
-            done()
-          catch err
-            done err
+        @promise.then =>
+          expect( FS.exists(path.dirname(@coffee_file.dest_path)) ).to.be.false
+          done()
+        .fail(done)
