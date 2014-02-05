@@ -12,7 +12,10 @@
   "devDependencies": {
     "coffee-script": "~> 1.6.3",
     "jasmine-node": "~> 1.2.0",
-    "fs.extra": "~1.2.1"
+    "fs.extra": "~1.2.1",
+    "mocha": "~1.17.1",
+    "chai": "~1.9.0",
+    "sinon": "~1.8.1"
   },
   "repository": {
     "type": "git",
