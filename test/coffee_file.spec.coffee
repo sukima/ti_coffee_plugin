@@ -67,7 +67,7 @@ describe "CoffeeFile", ->
       @promise = @coffee_file.waitingForReady
       @promise.done =>
         try
-          expect( @coffee_file.hash ).to.be.a.string
+          expect( @coffee_file.hash ).to.be.a "string"
           expect( @coffee_file.hash.length ).to.not.equal 0
           done()
         catch err

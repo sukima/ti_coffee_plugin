@@ -37,8 +37,8 @@ describe "TiCoffeePlugin", ->
       sandbox.stub TiCoffeePlugin::, "findCoffeeFiles"
       sandbox.stub TiCoffeePlugin::, "loadHashes"
 
-    it "should define a cliVersion", ->
-      expect( TiCoffeePlugin.cliVersion ).to.be.a.string
+    it "defines a cliVersion", ->
+      expect( TiCoffeePlugin.cliVersion ).to.be.a "string"
 
     describe "#init", ->
 
@@ -50,7 +50,7 @@ describe "TiCoffeePlugin", ->
           priority: sinon.match.number
           post:     sinon.match.func
 
-      it "should call addHook with build.pre.compile", ->
+      it "should call addHook with clean.post", ->
         sinon.assert.calledWith @cli.addHook, "clean.post", sinon.match.func
 
   describe "#constructor", ->
