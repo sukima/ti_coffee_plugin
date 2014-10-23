@@ -1,3 +1,11 @@
+# DEPRECATED
+
+This code has been deprecated and is no longer maintained. The newest Titanium CLI tools make asynchronous compile hooks near impossible. Since a complete rewrite would be needed to become compatible with new versions of Titanium I opted to deprecate this in favor for pre-compile build tools such as gulp or grunt. I assume most coders who are using CoffeeScript have leveled up and can manage a build environment outside of Titanium Studio and no longer require the crutch of a compile hook such as this.
+
+Anyone interested in rewriting this for the newer versions of Titanium can easily take over this project and remove the deprecation.
+
+For an example of a gulp build using Titanium and CoffeeScript please check out [this example project](https://github.com/sukima/ti-cs-gulp-example).
+
 # [CoffeeScript][] -> Javascript compiler plugin for Titanium Projects.
 
 [![Build Status](https://travis-ci.org/sukima/ti_coffee_plugin.png?branch=master)](https://travis-ci.org/sukima/ti_coffee_plugin)
